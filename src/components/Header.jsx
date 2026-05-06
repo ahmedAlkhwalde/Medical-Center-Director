@@ -44,7 +44,7 @@ const Header = ({ isDark, onToggleTheme }) => {
                   type="search"
                   value={searchQuery}
                   onChange={handleSearchChange}
-                  placeholder="ابحث عن مريض، اختصاص، أو تقرير..."
+                  placeholder="ابحث في النظام..."
                   className="w-full rounded-[15px] border-0 bg-transparent py-2.5 pr-12 pl-4 text-sm theme-text outline-none transition-all placeholder:text-[var(--color-grey)]"
                 />
                 <Search
@@ -104,7 +104,7 @@ const Header = ({ isDark, onToggleTheme }) => {
               type="search"
               value={searchQuery}
               onChange={handleSearchChange}
-              placeholder="ابحث عن اختصاص أو مريض..."
+              placeholder="ابحث في النظام..."
               className="w-full rounded-[15px] border-0 bg-transparent py-2.5 pr-12 pl-4 text-sm theme-text outline-none transition-all placeholder:text-[var(--color-grey)]"
             />
             <Search
