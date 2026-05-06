@@ -16,10 +16,10 @@ const SpecialtyCard = ({ data }) => {
       layout
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.9 }}
-      transition={{ duration: 0.2 }} // تأثير الظهور المتتابع
-      whileHover={{ y: -5 }} // رفع البطاقة قليلاً عند الحوم
-      className="theme-surface theme-border border rounded-2xl p-4 sm:p-5 md:p-6 relative group transition-all duration-300 hover:shadow-xl hover:theme-shadow-accent"
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ type: "spring", stiffness: 260, damping: 22 }}
+      whileHover={{ y: -5 }}
+      className="group relative rounded-2xl border theme-border theme-surface p-4 shadow-md shadow-black/5 transition-all duration-700 ease-out hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-black/15 hover:theme-shadow-accent sm:p-5 md:p-6"
     >
       <div className="flex items-start justify-between gap-3 mb-5 sm:mb-6">
         <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-xl theme-accent-soft theme-text-accent">

@@ -21,6 +21,7 @@ const createInitialFormData = (editingDoctor) => ({
   phone: editingDoctor?.phone || "",
   email: editingDoctor?.email || "",
   contractEndDate: editingDoctor?.contractEndDate || "",
+  profitRate: editingDoctor?.profitRate ?? "",
   clinicId: editingDoctor?.clinicId ? String(editingDoctor.clinicId) : "",
   specialtyId: editingDoctor?.specialtyId
     ? String(editingDoctor.specialtyId)
@@ -74,6 +75,13 @@ const ModalContent = ({ editingDoctor, specialties, onClose, onSave }) => {
       newErrors.contractEndDate = "تاريخ انتهاء العقد مطلوب";
     } else if (isPastDate(formData.contractEndDate)) {
       newErrors.contractEndDate = "يجب أن يكون التاريخ اليوم أو في المستقبل";
+    }
+
+    const profitRate = Number(formData.profitRate);
+    if (formData.profitRate === "") {
+      newErrors.profitRate = "نسبة الربح مطلوبة";
+    } else if (Number.isNaN(profitRate) || profitRate < 0 || profitRate > 100) {
+      newErrors.profitRate = "نسبة الربح يجب أن تكون بين 0 و 100";
     }
 
     if (!formData.clinicId) {
@@ -212,16 +220,36 @@ const ModalContent = ({ editingDoctor, specialties, onClose, onSave }) => {
             </SelectField>
           </div>
 
-          <InputField
-            label="تاريخ انتهاء العقد"
-            type="date"
-            value={formData.contractEndDate}
-            error={errors.contractEndDate}
-            min={getTodayISODate()}
-            onChange={(event) =>
-              setFormData({ ...formData, contractEndDate: event.target.value })
-            }
-          />
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <InputField
+              label="تاريخ انتهاء العقد"
+              type="date"
+              value={formData.contractEndDate}
+              error={errors.contractEndDate}
+              min={getTodayISODate()}
+              onChange={(event) =>
+                setFormData({
+                  ...formData,
+                  contractEndDate: event.target.value,
+                })
+              }
+            />
+
+            <InputField
+              label="نسبة الربح (%)"
+              type="number"
+              inputMode="decimal"
+              min="0"
+              max="100"
+              step="1"
+              value={formData.profitRate}
+              error={errors.profitRate}
+              placeholder="0 - 100"
+              onChange={(event) =>
+                setFormData({ ...formData, profitRate: event.target.value })
+              }
+            />
+          </div>
 
           <div className="flex flex-col gap-3 pt-2 sm:flex-row">
             <button

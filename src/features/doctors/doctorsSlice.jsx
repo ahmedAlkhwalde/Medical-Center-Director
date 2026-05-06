@@ -6,6 +6,16 @@ const getTodayISODate = () => {
   return new Date(now.getTime() - offset * 60000).toISOString().slice(0, 10);
 };
 
+const normalizeProfitRate = (value) => {
+  const parsedValue = Number(value);
+
+  if (!Number.isFinite(parsedValue)) {
+    return 0;
+  }
+
+  return Math.min(100, Math.max(0, parsedValue));
+};
+
 export const CLINIC_OPTIONS = [
   { id: 1, label: "عيادة رقم 1" },
   { id: 2, label: "عيادة رقم 2" },
@@ -25,6 +35,7 @@ const initialState = {
       contractEndDate: "2027-06-30",
       clinicId: 2,
       specialtyId: 1,
+      profitRate: 35,
       joinedAt: "2024-08-01",
       isActive: true,
     },
@@ -36,6 +47,7 @@ const initialState = {
       contractEndDate: "2026-12-31",
       clinicId: 1,
       specialtyId: 2,
+      profitRate: 60,
       joinedAt: "2025-02-15",
       isActive: false,
     },
@@ -68,6 +80,7 @@ const doctorsSlice = createSlice({
         contractEndDate: payload.contractEndDate,
         clinicId: Number(payload.clinicId),
         specialtyId: Number(payload.specialtyId),
+        profitRate: normalizeProfitRate(payload.profitRate),
       };
 
       if (state.editingDoctor) {
@@ -110,6 +123,7 @@ const doctorsSlice = createSlice({
           joinedAt: doctor.joinedAt || getTodayISODate(),
           isActive:
             typeof doctor.isActive === "boolean" ? doctor.isActive : true,
+          profitRate: normalizeProfitRate(doctor.profitRate),
           id: state.nextId,
         });
         state.nextId += 1;

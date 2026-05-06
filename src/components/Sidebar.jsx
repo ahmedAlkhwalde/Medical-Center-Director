@@ -19,7 +19,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import HomeIcon from "@mui/icons-material/Home"; // للرئيسية
 import AccessTimeIcon from "@mui/icons-material/AccessTime"; // لبرنامج الدوام
 import CategoryIcon from "@mui/icons-material/Category"; // لإدارة الاختصاصات
-import SupportAgentIcon from "@mui/icons-material/SupportAgent"; // لإدارة السكرتاريا
+import LocalHospitalIcon from "@mui/icons-material/LocalHospital"; // لإدارة العيادات
 import PersonSearchIcon from "@mui/icons-material/PersonSearch"; // لسجل المرضى
 
 const navItems = [
@@ -49,9 +49,9 @@ const navItems = [
   },
   {
     id: 5,
-    name: "إدارة السكرتاريا",
-    icon: <SupportAgentIcon />,
-    path: "/main-page/secretaries", // تم تغيير المسار ليتناسب مع "السكرتاريا"
+    name: "إدارة العيادات",
+    icon: <LocalHospitalIcon />,
+    path: "/main-page/clinics", // تم تغيير المسار ليتناسب مع "العيادات"
   },
   {
     id: 6,

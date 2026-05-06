@@ -1,8 +1,8 @@
 import { Routes, Route } from "react-router-dom";
 import Layout from "../components/Layout";
-import LoginPage from "./Login/LoginPage";
 import SpecialtiesPage from "./specialties/SpecialtiesPage";
 import DoctorsPage from "./doctors/DoctorsPage";
+import ClinicsPage from "./clinics/ClinicsPage";
 
 const Dashboard = () => <div className="text-xl">محتوى لوحة القيادة</div>;
 const Reports = () => <div className="text-xl">محتوى التقارير المالية</div>;
@@ -16,7 +16,7 @@ export default function MainPage() {
           <Route path="schedule" element={<Dashboard />} />
           <Route path="specialties" element={<SpecialtiesPage />} />
           <Route path="doctors" element={<DoctorsPage />} />
-          <Route path="secretaries" element={<Reports />} />
+          <Route path="clinics" element={<ClinicsPage />} />
           <Route path="patients-records" element={<Reports />} />
         </Routes>
       </Layout>

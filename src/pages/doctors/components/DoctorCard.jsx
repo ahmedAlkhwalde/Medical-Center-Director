@@ -16,8 +16,13 @@ const DoctorCard = ({
   specialtyName,
   clinicNumber,
   onEdit,
-//   onToggleStatus,
+  //   onToggleStatus,
 }) => {
+  const rawProfitRate = Number(doctor.profitRate);
+  const profitRate = Number.isFinite(rawProfitRate)
+    ? Math.min(100, Math.max(0, rawProfitRate))
+    : 0;
+
   return (
     <Motion.div
       layout
@@ -25,7 +30,7 @@ const DoctorCard = ({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ type: "spring", stiffness: 260, damping: 22 }}
-      whileHover={{ y: -8 }}
+      whileHover={{ y: -5 }}
       className="group relative rounded-2xl border theme-border theme-surface p-4 shadow-md shadow-black/5 transition-all duration-700 ease-out hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-black/15 hover:theme-shadow-accent sm:p-5 md:p-6"
     >
       <div className="mb-5 flex items-start justify-between gap-3">
@@ -78,7 +83,7 @@ const DoctorCard = ({
       </div>
 
       <div className="space-y-3 text-sm">
-        <InfoRow icon={PhoneOutlined} label="رقم الهاتف" value={doctor.phone} />
+        {/* <InfoRow icon={PhoneOutlined} label="رقم الهاتف" value={doctor.phone} /> */}
         <InfoRow
           icon={MailOutlined}
           label="البريد الإلكتروني"
@@ -97,6 +102,29 @@ const DoctorCard = ({
           value={doctor.contractEndDate || "غير محدد"}
           title={doctor.contractEndDate}
         />
+      </div>
+
+      <div className=" space-y-2 mt-3 rounded-xl theme-bg p-2">
+        <div className="flex items-center justify-between gap-3 text-sm">
+          <span className="font-bold theme-text-muted">نسبة الربح</span>
+          <span className="font-bold text-green-600 dark:text-green-400">
+            {profitRate}%
+          </span>
+        </div>
+
+        <div
+          className="h-2 overflow-hidden rounded-full bg-green-100 dark:bg-green-900/30"
+          role="progressbar"
+          aria-valuenow={profitRate}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label={`نسبة الربح ${profitRate}%`}
+        >
+          <div
+            className="h-full rounded-full bg-green-500 transition-all duration-500"
+            style={{ width: `${profitRate}%` }}
+          />
+        </div>
       </div>
     </Motion.div>
   );
