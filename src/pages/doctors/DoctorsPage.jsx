@@ -1,7 +1,15 @@
 import { useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { motion as Motion, AnimatePresence } from "framer-motion";
-import { Add, FilterAlt, UploadFile } from "@mui/icons-material";
+import {
+  Add,
+  FilterAlt,
+  PeopleOutline,
+  ToggleOffOutlined,
+  ToggleOnOutlined,
+  TrendingUpOutlined,
+  UploadFile,
+} from "@mui/icons-material";
 import DoctorCard from "./components/DoctorCard";
 import AddDoctorModal from "./components/AddDoctorModal";
 import {
@@ -69,6 +77,50 @@ const DoctorsPage = () => {
     });
   }, [doctors, normalizedSearchQuery, selectedSpecialtyId, specialtyMap]);
 
+  const stats = useMemo(() => {
+    const activeDoctors = doctors.filter((doctor) => doctor.isActive).length;
+    const inactiveDoctors = doctors.length - activeDoctors;
+    const averageProfitRate = doctors.length
+      ? Math.round(
+          doctors.reduce(
+            (sum, doctor) => sum + (Number(doctor.profitRate) || 0),
+            0,
+          ) / doctors.length,
+        )
+      : 0;
+
+    return [
+      {
+        id: 1,
+        label: "إجمالي الأطباء",
+        value: doctors.length,
+        note: "جميع السجلات المسجلة",
+        icon: <PeopleOutline />,
+      },
+      {
+        id: 2,
+        label: "المفعّلون",
+        value: activeDoctors,
+        note: "الأطباء النشطون حاليًا",
+        icon: <ToggleOnOutlined />,
+      },
+      {
+        id: 3,
+        label: "المعطّلون",
+        value: inactiveDoctors,
+        note: "الأطباء غير النشطين",
+        icon: <ToggleOffOutlined />,
+      },
+      {
+        id: 4,
+        label: "متوسط الربح",
+        value: `${averageProfitRate}%`,
+        note: "متوسط نسبة الربح المسجلة",
+        icon: <TrendingUpOutlined />,
+      },
+    ];
+  }, [doctors]);
+
   return (
     <section className="w-full min-w-0 space-y-6">
       <div className="overflow-hidden rounded-3xl border theme-border theme-surface-90 theme-gradient-panel p-4 shadow-sm sm:p-5 md:p-6">
@@ -128,6 +180,36 @@ const DoctorsPage = () => {
           </div>
         </div>
       </div>
+
+      <Motion.div
+        layout
+        className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
+      >
+        {stats.map((stat, index) => (
+          <Motion.div
+            key={stat.id}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.05 }}
+            className="rounded-2xl border theme-border theme-surface p-4 shadow-sm sm:p-5"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1 text-right">
+                <p className="text-xs font-bold uppercase tracking-wide theme-text-muted">
+                  {stat.label}
+                </p>
+                <h3 className="text-2xl font-bold theme-text-accent">
+                  {stat.value}
+                </h3>
+                <p className="text-sm theme-text-muted">{stat.note}</p>
+              </div>
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl theme-accent-soft theme-text-accent">
+                {stat.icon}
+              </div>
+            </div>
+          </Motion.div>
+        ))}
+      </Motion.div>
 
       <input
         ref={fileInputRef}

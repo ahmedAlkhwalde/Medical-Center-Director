@@ -2,15 +2,15 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-:root {
-    --color-primary: #F8F9FA;      /* الخلفية الرئيسية */
-    --color-secondary: #FFFFFF;    /* خلفية الدراور والعناصر */
-    /* --color-accent: #2563EB;       اللون الأساسي (أزرق) */
-    --color-accent: #2563EB;       /* اللون الأساسي (أزرق) */
-    --color-text: #1E3A8A;         /* النصوص الرئيسية */
-    --color-grey: #64748B;         /* النصوص الثانوية */
-    --color-border: #E2E8F0;       /* الحدود والفواصل */
-    --color-danger: #EF4444;       /* اللون الأحمر للتنبيه */
+/* :root {
+    --color-primary: #F8F9FA;     
+    --color-secondary: #FFFFFF; 
+    --color-accent: #2563EB;    
+    --color-accent: #2563EB;   
+    --color-text: #1E3A8A;      
+    --color-grey: #64748B;   
+    --color-border: #E2E8F0;       
+    --color-danger: #EF4444;    
     --color-on-accent: var(--color-secondary);
     --color-accent-soft: color-mix(in srgb, var(--color-accent) 12%, transparent);
     --color-accent-strong: color-mix(in srgb, var(--color-accent) 85%, var(--color-primary));
@@ -24,17 +24,70 @@
 }
 
 .dark {
-    /* الوضع الداكن - Dark Mode */
-    --color-primary: #1F1F1F;      /* خلفية داكنة جداً */
-    --color-secondary: #181818;    /* خلفية الدراور الداكنة */
-    --color-accent: #3B82F6;       /* أزرق فاتح قليلاً للوضوح */
-    --color-text: #F1F5F9;         /* نصوص فاتحة */
-    --color-grey: #94A3B8;         /* نصوص ثانوية رمادية */
+    --color-primary: #1F1F1F;    
+    --color-secondary: #181818;  
+    --color-accent: #3B82F6;    
+    --color-text: #F1F5F9;     
+    --color-grey: #94A3B8;    
     --color-border: color-mix(in srgb, var(--color-secondary) 70%, var(--color-primary));
     --color-on-accent: var(--color-text);
     --color-accent-strong: color-mix(in srgb, var(--color-accent) 70%, var(--color-primary));
     --color-overlay: color-mix(in srgb, var(--color-primary) 60%, transparent);
     --color-shadow-accent: color-mix(in srgb, var(--color-accent) 35%, transparent);
+} */
+
+
+:root {
+    /* ================= LIGHT MODE ================= */
+    --color-primary: #F6FEFF;      /* Background: lightBackground */
+    --color-secondary: #FFFFFF;    /* Surface: lightSurface */
+    
+    /* Brand Colors */
+    --color-accent: #0AB3BA;       /* primaryTeal */
+    --color-accent-secondary: #F28A4C; /* accentOrange */
+    
+    --color-text: #0F172A;         /* lightTextPrimary */
+    --color-grey: #475569;         /* lightTextSecondary */
+    --color-border: #E2E8F0;       /* lightBorder */
+    
+    /* Status */
+    --color-success: #22C55E;
+    --color-warning: #F59E0B;
+    --color-danger: #EF4444;       /* error */
+    --color-info: #3B82F6;
+
+    /* Derived Colors (متغيرات مشتقة للتفاعلات) */
+    --color-on-accent: #FFFFFF;
+    --color-accent-soft: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    --color-accent-strong: color-mix(in srgb, var(--color-accent) 85%, var(--color-primary));
+    --color-surface-90: color-mix(in srgb, var(--color-secondary) 90%, transparent);
+    --color-surface-hover: color-mix(in srgb, var(--color-secondary) 95%, var(--color-accent));
+    --color-danger-soft: color-mix(in srgb, var(--color-danger) 12%, transparent);
+    --color-overlay: color-mix(in srgb, var(--color-text) 10%, transparent);
+    --color-shadow-accent: color-mix(in srgb, var(--color-accent) 20%, transparent);
+    
+    --main-gradient: linear-gradient(135deg, var(--color-accent) 0%, #09B2B9 100%);
+    --font-family: 'Almarai', sans-serif;
+}
+
+.dark {
+    /* ================= DARK MODE ================= */
+    --color-primary: #0F172A;      /* darkBackground */
+    --color-secondary: #1E293B;    /* darkSurface */
+    
+    /* نستخدم الـ Teal الأصلي مع زيادة السطوع قليلاً في الداكن إذا لزم الأمر */
+    --color-accent: #0AB3BA;       
+    
+    --color-text: #F8FAFC;         /* darkTextPrimary */
+    --color-grey: #CBD5E1;         /* darkTextSecondary */
+    --color-border: #334155;       /* darkBorder */
+    
+    /* Derived Colors (Dark Mode) */
+    --color-on-accent: #0F172A;
+    --color-accent-strong: color-mix(in srgb, var(--color-accent) 70%, var(--color-primary));
+    --color-overlay: color-mix(in srgb, var(--color-primary) 60%, transparent);
+    --color-shadow-accent: color-mix(in srgb, var(--color-accent) 40%, transparent);
+    --color-surface-hover: color-mix(in srgb, var(--color-secondary) 80%, var(--color-accent));
 }
 
 * {
@@ -203,4 +256,13 @@ input[type=number] {
 
 .theme-hover-text-accent:hover {
     color: var(--color-accent);
+}
+
+.no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
 }

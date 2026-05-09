@@ -55,6 +55,12 @@ const navItems = [
   },
   {
     id: 6,
+    name: "إدارة السكرتاريا",
+    icon: <PeopleIcon />,
+    path: "/main-page/secretary", // مسار قسم السكرتاريا
+  },
+  {
+    id: 7,
     name: "سجل المرضى",
     icon: <PersonSearchIcon />,
     path: "/main-page/patients-records", // تم تغيير المسار ليتناسب مع "المرضى"
@@ -88,7 +94,7 @@ const Sidebar = () => {
           x: window.innerWidth < 768 ? (isMobileOpen ? 0 : "100%") : 0,
         }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="fixed top-0 right-0 h-screen border-l theme-border theme-surface-90 backdrop-blur-xl shadow-2xl flex flex-col z-70 overflow-hidden rtl"
+        className="fixed top-0 right-0 h-screen min-h-0 border-l theme-border theme-surface-90 backdrop-blur-xl shadow-2xl flex flex-col z-70 overflow-hidden rtl"
       >
         {/* Header Section مع Animation عالي الجودة للشعار */}
         <div className="p-6 flex flex-col items-center border-b theme-border relative">
@@ -142,7 +148,7 @@ const Sidebar = () => {
         </div>
 
         {/* القائمة - الأيقونة يمين والنص يسار */}
-        <div className="flex-1 px-3 py-6 space-y-2 overflow-y-auto">
+        <div className="flex-1 min-h-0 px-3 py-6 space-y-2 overflow-y-auto no-scrollbar overscroll-contain">
           {navItems.map((item) => (
             <NavLink
               key={item.id}

@@ -1,11 +1,14 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { getInitialThemeMode } from "../app/theme";
+
+const initialDarkMode = getInitialThemeMode();
 
 const uiSlice = createSlice({
   name: "ui",
   initialState: {
     isCollapsed: false,
     isMobileOpen: false,
-    darkMode: false, // الحالة الجديدة
+    darkMode: initialDarkMode,
     searchQuery: "",
   },
   reducers: {

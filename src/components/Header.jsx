@@ -1,4 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
 import { motion as Motion } from "framer-motion";
 import {
   Search,
@@ -13,7 +14,9 @@ import { setSearchQuery, toggleMobileMenu } from "../features/uiSlice";
 const Header = ({ isDark, onToggleTheme }) => {
   const dispatch = useDispatch();
   const { searchQuery } = useSelector((state) => state.ui);
+  const location = useLocation();
   const showThemeToggle = typeof onToggleTheme === "function";
+  const showGlobalSearch = location.pathname !== "/main-page/patients-records";
 
   const handleSearchChange = (event) => {
     dispatch(setSearchQuery(event.target.value));
@@ -37,23 +40,25 @@ const Header = ({ isDark, onToggleTheme }) => {
             <p className="text-[10px] theme-text-muted">لوحة التحكم</p>
           </div>
 
-          <div className="hidden flex-1 md:block">
-            <div className="relative max-w-2xl rounded-2xl p-[1px] theme-gradient-border shadow-sm">
-              <div className="relative rounded-[15px] theme-surface-90">
-                <input
-                  type="search"
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                  placeholder="ابحث في النظام..."
-                  className="w-full rounded-[15px] border-0 bg-transparent py-2.5 pr-12 pl-4 text-sm theme-text outline-none transition-all placeholder:text-[var(--color-grey)]"
-                />
-                <Search
-                  className="absolute right-4 top-1/2 -translate-y-1/2 theme-text-muted"
-                  fontSize="small"
-                />
+          {showGlobalSearch && (
+            <div className="hidden flex-1 md:block">
+              <div className="relative max-w-2xl rounded-2xl p-px theme-gradient-border shadow-sm">
+                <div className="relative rounded-[15px] theme-surface-90">
+                  <input
+                    type="search"
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    placeholder="ابحث في النظام..."
+                    className="w-full rounded-[15px] border-0 bg-transparent py-2.5 pr-12 pl-4 text-sm theme-text outline-none transition-all placeholder:text-(--color-grey)"
+                  />
+                  <Search
+                    className="absolute right-4 top-1/2 -translate-y-1/2 theme-text-muted"
+                    fontSize="small"
+                  />
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
@@ -97,23 +102,25 @@ const Header = ({ isDark, onToggleTheme }) => {
         </div>
       </div>
 
-      <div className="px-3 pb-3 sm:px-4 md:hidden">
-        <div className="rounded-2xl p-[1px] theme-gradient-border shadow-sm">
-          <div className="relative rounded-[15px] theme-surface-90">
-            <input
-              type="search"
-              value={searchQuery}
-              onChange={handleSearchChange}
-              placeholder="ابحث في النظام..."
-              className="w-full rounded-[15px] border-0 bg-transparent py-2.5 pr-12 pl-4 text-sm theme-text outline-none transition-all placeholder:text-[var(--color-grey)]"
-            />
-            <Search
-              className="absolute right-4 top-1/2 -translate-y-1/2 theme-text-muted"
-              fontSize="small"
-            />
+      {showGlobalSearch && (
+        <div className="px-3 pb-3 sm:px-4 md:hidden">
+          <div className="rounded-2xl p-px theme-gradient-border shadow-sm">
+            <div className="relative rounded-[15px] theme-surface-90">
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={handleSearchChange}
+                placeholder="ابحث في النظام..."
+                className="w-full rounded-[15px] border-0 bg-transparent py-2.5 pr-12 pl-4 text-sm theme-text outline-none transition-all placeholder:text-(--color-grey)"
+              />
+              <Search
+                className="absolute right-4 top-1/2 -translate-y-1/2 theme-text-muted"
+                fontSize="small"
+              />
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </header>
   );
 };

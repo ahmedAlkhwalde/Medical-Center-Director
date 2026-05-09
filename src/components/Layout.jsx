@@ -1,43 +1,17 @@
-import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import React from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { motion as Motion } from "framer-motion";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
-
-const getInitialTheme = () => {
-  if (typeof window === "undefined") {
-    return "light";
-  }
-
-  const stored = window.localStorage.getItem("theme");
-  if (stored === "dark" || stored === "light") {
-    return stored;
-  }
-
-  return window.matchMedia &&
-    window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
-};
+import { toggleDarkMode } from "../features/uiSlice";
 
 const Layout = ({ children }) => {
-  const { isCollapsed } = useSelector((state) => state.ui);
-  const [theme, setTheme] = useState(getInitialTheme);
-  const isDark = theme === "dark";
-
-  useEffect(() => {
-    const root = document.documentElement;
-    if (isDark) {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-
-    window.localStorage.setItem("theme", theme);
-  }, [theme, isDark]);
+  const { isCollapsed, darkMode } = useSelector((state) => state.ui);
+  const dispatch = useDispatch();
+  const isDark = darkMode;
 
   const toggleTheme = () => {
-    setTheme(isDark ? "light" : "dark");
+    dispatch(toggleDarkMode());
   };
 
   return (
