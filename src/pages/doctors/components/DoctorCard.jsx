@@ -16,6 +16,7 @@ const DoctorCard = ({
   specialtyName,
   clinicNumber,
   onEdit,
+  onViewDetails,
   //   onToggleStatus,
 }) => {
   const rawProfitRate = Number(doctor.profitRate);
@@ -31,7 +32,8 @@ const DoctorCard = ({
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ type: "spring", stiffness: 260, damping: 22 }}
       whileHover={{ y: -5 }}
-      className="group relative rounded-2xl border theme-border theme-surface p-4 shadow-md shadow-black/5 transition-all duration-700 ease-out hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-black/15 hover:theme-shadow-accent sm:p-5 md:p-6"
+      onClick={() => onViewDetails?.(doctor.id)}
+      className="group relative cursor-pointer rounded-2xl border theme-border theme-surface p-4 shadow-md shadow-black/5 transition-all duration-700 ease-out hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-black/15 hover:theme-shadow-accent sm:p-5 md:p-6"
     >
       <div className="mb-5 flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
@@ -49,7 +51,22 @@ const DoctorCard = ({
         <div className="flex gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
           <button
             type="button"
-            onClick={onEdit}
+            onClick={(e) => {
+              e.stopPropagation();
+              onViewDetails?.(doctor.id);
+            }}
+            className="cursor-pointer rounded-lg p-2 theme-text-muted theme-hover-accent"
+            aria-label="عرض التفاصيل"
+            title="عرض الملف الشخصي"
+          >
+            <PersonOutline fontSize="small" />
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(e);
+            }}
             className="cursor-pointer rounded-lg p-2 theme-text-accent theme-hover-accent"
             aria-label="تعديل الطبيب"
           >

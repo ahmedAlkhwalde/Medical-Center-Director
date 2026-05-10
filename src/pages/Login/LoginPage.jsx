@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleRememberMe, login } from "../../features/auth/authSlice";
 import AuthInput from "./Components/AuthInput";
@@ -13,9 +13,11 @@ const LoginPage = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // نراقب الـ token والـ rememberMe من الـ Redux
   const { rememberMe, token } = useSelector((state) => state.auth);
+  const passwordResetSuccess = location.state?.passwordResetSuccess;
 
   // --- أفضل مكان للانتقال ---
   // نراقب الـ token؛ بمجرد وجوده، يتم الانتقال تلقائياً
@@ -80,6 +82,12 @@ const LoginPage = () => {
               </p>
             </div>
 
+            {/* {passwordResetSuccess ? (
+              <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-right text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+                تم تغيير كلمة المرور بنجاح. يمكنك تسجيل الدخول بالكلمة الجديدة.
+              </div>
+            ) : null} */}
+
             <AuthInput
               label="رقم الهاتف"
               type="number"
@@ -123,6 +131,15 @@ const LoginPage = () => {
               <span>دخول النظام</span>
               <LoginIcon fontSize="small" />
             </button>
+
+            <div className="text-center">
+              <Link
+                to="/reset-password"
+                className="inline-flex items-center justify-center text-sm font-bold theme-text-accent hover:opacity-80 transition-opacity"
+              >
+                نسيت كلمة المرور؟
+              </Link>
+            </div>
           </form>
 
           <div className="mt-5 text-center border-t theme-border pt-6">

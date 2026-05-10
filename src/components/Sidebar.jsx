@@ -7,7 +7,6 @@ import { toggleCollapse, closeMobileMenu } from "../features/uiSlice";
 // MUI Icons
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PeopleIcon from "@mui/icons-material/People";
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import PaymentsIcon from "@mui/icons-material/Payments";
 import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -16,11 +15,14 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
 // استيراد الأيقونات المناسبة من MUI
-import HomeIcon from "@mui/icons-material/Home"; // للرئيسية
-import AccessTimeIcon from "@mui/icons-material/AccessTime"; // لبرنامج الدوام
-import CategoryIcon from "@mui/icons-material/Category"; // لإدارة الاختصاصات
-import LocalHospitalIcon from "@mui/icons-material/LocalHospital"; // لإدارة العيادات
-import PersonSearchIcon from "@mui/icons-material/PersonSearch"; // لسجل المرضى
+import HomeIcon from '@mui/icons-material/Home';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'; // للدوام والجدولة
+import AccountTreeIcon from '@mui/icons-material/AccountTree'; // للاختصاصات
+import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1'; // لإدارة الأطباء
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital'; // للعيادات
+import SupportAgentIcon from '@mui/icons-material/SupportAgent'; // للسكرتاريا
+import FolderSharedIcon from '@mui/icons-material/FolderShared'; // لسجل المرضى
+import MapOutlinedIcon from '@mui/icons-material/MapOutlined'; // للخريطة
 
 const navItems = [
   {
@@ -32,38 +34,44 @@ const navItems = [
   {
     id: 2,
     name: "برنامج الدوام",
-    icon: <AccessTimeIcon />,
-    path: "/main-page/schedule", // تم تغيير المسار ليتناسب مع "الدوام"
+    icon: <CalendarMonthIcon />,
+    path: "/main-page/schedule",
   },
   {
     id: 3,
     name: "إدارة الاختصاصات",
-    icon: <CategoryIcon />,
-    path: "/main-page/specialties", // تم تغيير المسار ليتناسب مع "الاختصاصات"
+    icon: <AccountTreeIcon />,
+    path: "/main-page/specialties",
   },
   {
     id: 4,
     name: "إدارة الأطباء",
-    icon: <MedicalServicesIcon />,
-    path: "/main-page/doctors", // تم تغيير المسار ليتناسب مع "الأطباء"
+    icon: <PersonAddAlt1Icon />,
+    path: "/main-page/doctors",
   },
   {
     id: 5,
     name: "إدارة العيادات",
     icon: <LocalHospitalIcon />,
-    path: "/main-page/clinics", // تم تغيير المسار ليتناسب مع "العيادات"
+    path: "/main-page/clinics",
   },
   {
     id: 6,
     name: "إدارة السكرتاريا",
-    icon: <PeopleIcon />,
-    path: "/main-page/secretary", // مسار قسم السكرتاريا
+    icon: <SupportAgentIcon />,
+    path: "/main-page/secretary",
   },
   {
     id: 7,
     name: "سجل المرضى",
-    icon: <PersonSearchIcon />,
-    path: "/main-page/patients-records", // تم تغيير المسار ليتناسب مع "المرضى"
+    icon: <FolderSharedIcon />,
+    path: "/main-page/patients-records",
+  },
+  {
+    id: 8,
+    name: "خريطة المركز",
+    icon: <MapOutlinedIcon />,
+    path: "/main-page/map",
   },
 ];
 

@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { motion as Motion, AnimatePresence } from "framer-motion";
 import {
@@ -28,6 +29,7 @@ const normalizeSearchText = (value = "") =>
 
 const DoctorsPage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const { doctors } = useSelector((state) => state.doctors);
   const { items: specialties } = useSelector((state) => state.specialties);
@@ -233,6 +235,9 @@ const DoctorsPage = () => {
                 }
                 clinicNumber={doctor.clinicId}
                 onEdit={() => dispatch(openModal(doctor))}
+                onViewDetails={(doctorId) =>
+                  navigate(`/main-page/doctors/${doctorId}`)
+                }
                 onToggleStatus={() => dispatch(toggleDoctorStatus(doctor.id))}
               />
             ))}

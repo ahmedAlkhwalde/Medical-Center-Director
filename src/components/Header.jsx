@@ -23,7 +23,7 @@ const Header = ({ isDark, onToggleTheme }) => {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b theme-border theme-surface-90 backdrop-blur-xl shadow-sm theme-gradient-header">
+    <header className="sticky top-0 z-5000 w-full border-b theme-border theme-surface-90 backdrop-blur-xl shadow-sm theme-gradient-header">
       <div className="flex items-center gap-3 px-3 py-3 sm:px-4 md:px-6">
         <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
           <button
@@ -95,7 +95,7 @@ const Header = ({ isDark, onToggleTheme }) => {
               <Person fontSize="small" />
             </div>
             <div className="text-right leading-tight">
-              <p className="text-xs font-bold theme-text">د. سارة الأحمد</p>
+              <p className="text-xs font-bold theme-text">د. أحمد الخوالدة</p>
               <p className="text-[10px] theme-text-muted">المدير التنفيذي</p>
             </div>
           </div>
