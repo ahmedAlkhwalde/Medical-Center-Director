@@ -8,6 +8,8 @@ import clinicsReducer from "../features/clinics/clinicsSlice";
 import mapReducer from "../features/map/mapSlice";
 import secretariesReducer from "../features/secretaries/secretariesSlice";
 import patientsReducer from "../features/patients/patientsSlice";
+import scheduleReducer from "../features/schedule/scheduleSlice";
+import chatReducer from "../features/chat/chatSlice";
 
 export const store = configureStore({
   reducer: {
@@ -20,5 +22,7 @@ export const store = configureStore({
     dashboard: dashboardReducer,
     secretaries: secretariesReducer,
     patients: patientsReducer,
+    schedule: scheduleReducer,
+    chat: chatReducer,
   },
 });

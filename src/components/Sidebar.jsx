@@ -1,8 +1,14 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { motion as Motion, AnimatePresence } from "framer-motion";
-import { toggleCollapse, closeMobileMenu } from "../features/uiSlice";
+import {
+  toggleCollapse,
+  closeMobileMenu,
+  showSnackbar,
+} from "../features/uiSlice";
+import { logout } from "../features/auth/authSlice";
+import { useLogoutMutation } from "../service/authService";
 
 // MUI Icons
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -15,14 +21,15 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
 // استيراد الأيقونات المناسبة من MUI
-import HomeIcon from '@mui/icons-material/Home';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'; // للدوام والجدولة
-import AccountTreeIcon from '@mui/icons-material/AccountTree'; // للاختصاصات
-import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1'; // لإدارة الأطباء
-import LocalHospitalIcon from '@mui/icons-material/LocalHospital'; // للعيادات
-import SupportAgentIcon from '@mui/icons-material/SupportAgent'; // للسكرتاريا
-import FolderSharedIcon from '@mui/icons-material/FolderShared'; // لسجل المرضى
-import MapOutlinedIcon from '@mui/icons-material/MapOutlined'; // للخريطة
+import HomeIcon from "@mui/icons-material/Home";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth"; // للدوام والجدولة
+import AccountTreeIcon from "@mui/icons-material/AccountTree"; // للاختصاصات
+import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1"; // لإدارة الأطباء
+import LocalHospitalIcon from "@mui/icons-material/LocalHospital"; // للعيادات
+import SupportAgentIcon from "@mui/icons-material/SupportAgent"; // للسكرتاريا
+import FolderSharedIcon from "@mui/icons-material/FolderShared"; // لسجل المرضى
+import MapOutlinedIcon from "@mui/icons-material/MapOutlined"; // للخريطة
+import ChatRoundedIcon from "@mui/icons-material/ChatRounded"; // للشات
 
 const navItems = [
   {
@@ -73,11 +80,45 @@ const navItems = [
     icon: <MapOutlinedIcon />,
     path: "/main-page/map",
   },
+  {
+    id: 9,
+    name: "الشات",
+    icon: <ChatRoundedIcon />,
+    path: "/main-page/chat",
+  },
 ];
 
 const Sidebar = () => {
   const { isCollapsed, isMobileOpen } = useSelector((state) => state.ui);
+  const token = useSelector((state) => state.auth.token);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const logoutMutation = useLogoutMutation();
+
+  const handleLogout = () => {
+    if (logoutMutation.isPending) return;
+
+    logoutMutation.mutate(token, {
+      onSuccess: () => {
+        dispatch(logout());
+        navigate("/");
+        dispatch(
+          showSnackbar({
+            message: "تم تسجيل الخروج بنجاح",
+            variant: "success",
+          }),
+        );
+      },
+      onError: () => {
+        dispatch(
+          showSnackbar({
+            message: "تعذر تسجيل الخروج. حاول لاحقاً.",
+            variant: "error",
+          }),
+        );
+      },
+    });
+  };
 
   return (
     <>
@@ -89,7 +130,7 @@ const Sidebar = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => dispatch(closeMobileMenu())}
-            className="fixed inset-0 theme-overlay z-60 md:hidden backdrop-blur-sm"
+            className="fixed inset-0 theme-overlay z-6000 md:hidden backdrop-blur-sm"
           />
         )}
       </AnimatePresence>
@@ -102,7 +143,7 @@ const Sidebar = () => {
           x: window.innerWidth < 768 ? (isMobileOpen ? 0 : "100%") : 0,
         }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="fixed top-0 right-0 h-screen min-h-0 border-l theme-border theme-surface-90 backdrop-blur-xl shadow-2xl flex flex-col z-70 overflow-hidden rtl"
+        className="fixed top-0 right-0 h-screen min-h-0 border-l theme-border theme-surface-90 backdrop-blur-xl shadow-2xl flex flex-col z-7000 overflow-hidden rtl"
       >
         {/* Header Section مع Animation عالي الجودة للشعار */}
         <div className="p-6 flex flex-col items-center border-b theme-border relative">
@@ -205,18 +246,29 @@ const Sidebar = () => {
 
         {/* Footer */}
         <div className="p-4 border-t theme-border">
-          <div className="flex justify-between gap-4 px-4 py-3 theme-text-danger theme-hover-danger rounded-xl cursor-pointer transition-colors group">
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={logoutMutation.isPending}
+            className="flex w-full items-center justify-between gap-4 px-4 py-3 theme-text-danger theme-hover-danger rounded-xl cursor-pointer transition-colors group"
+          >
             {!isCollapsed && (
               <Motion.span
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="font-medium"
               >
-                تسجيل الخروج
+                {logoutMutation.isPending
+                  ? "جاري تسجيل الخروج..."
+                  : "تسجيل الخروج"}
               </Motion.span>
             )}
-            <LogoutIcon className="shrink-0 group-hover:rotate-12 transition-transform" />
-          </div>
+            {logoutMutation.isPending ? (
+              <span className="inline-flex h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            ) : (
+              <LogoutIcon className="shrink-0 group-hover:rotate-12 transition-transform" />
+            )}
+          </button>
         </div>
       </Motion.nav>
     </>
