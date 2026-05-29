@@ -19,6 +19,7 @@ import {
   LocalFireDepartment,
 } from "@mui/icons-material";
 import { toggleDoctorStatus } from "../../features/doctors/doctorsSlice";
+import { useSpecialtiesQuery } from "../../service/specialtiesService";
 
 const formatNumber = (value) => new Intl.NumberFormat("ar-SA").format(value);
 
@@ -349,18 +350,23 @@ const DoctorDetailPage = () => {
   const [filterMode, setFilterMode] = useState("none"); // none | day | month | year
   const [filterValue, setFilterValue] = useState("");
   const { doctors } = useSelector((state) => state.doctors);
-  const { items: specialties } = useSelector((state) => state.specialties);
+  const { data: specialties = [] } = useSpecialtiesQuery();
 
   const doctor = useMemo(
     () => doctors.find((d) => String(d.id) === String(doctorId)),
     [doctors, doctorId],
   );
 
-  const specialtyName = useMemo(
-    () =>
-      specialties.find((s) => s.id === doctor?.specialtyId)?.name || "غير محدد",
-    [doctor, specialties],
-  );
+  const specialtyName = useMemo(() => {
+    if (!doctor?.specialtyId) return "غير محدد";
+    const targetId = String(doctor.specialtyId);
+    const match = specialties.find((specialty) =>
+      [specialty?.id, specialty?.legacyId, specialty?.uuid].some(
+        (value) => value != null && String(value) === targetId,
+      ),
+    );
+    return match?.name || "غير محدد";
+  }, [doctor, specialties]);
 
   const clinicNumber = useMemo(() => {
     const clinicMatch = doctor?.clinicId ? String(doctor.clinicId) : "1";

@@ -1,13 +1,39 @@
 import { motion as Motion, AnimatePresence } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  executeDelete,
-  closeDeleteDialog,
-} from "../../../features/specialties/specialtiesSlice";
+import { closeDeleteDialog } from "../../../features/specialties/specialtiesSlice";
+import { showSnackbar } from "../../../features/uiSlice";
+import { useDeleteSpecialtyMutation } from "../../../service/specialtiesService";
 
 const DeleteConfirmDialog = () => {
-  const { isDeleteSheetOpen } = useSelector((state) => state.specialties);
+  const { isDeleteSheetOpen, itemToDelete } = useSelector(
+    (state) => state.specialties,
+  );
   const dispatch = useDispatch();
+  const deleteSpecialtyMutation = useDeleteSpecialtyMutation({
+    onSuccess: () => {
+      dispatch(closeDeleteDialog());
+      dispatch(
+        showSnackbar({
+          message: "تم حذف الاختصاص بنجاح",
+          variant: "success",
+        }),
+      );
+    },
+    onError: () => {
+      dispatch(
+        showSnackbar({
+          message: "تعذر حذف الاختصاص حاليا",
+          variant: "error",
+        }),
+      );
+    },
+  });
+
+  const handleDelete = () => {
+    if (!itemToDelete || deleteSpecialtyMutation.isPending) return;
+    dispatch(closeDeleteDialog());
+    deleteSpecialtyMutation.mutate(itemToDelete);
+  };
 
   return (
     <AnimatePresence>
@@ -38,13 +64,15 @@ const DeleteConfirmDialog = () => {
             </p>
             <div className="flex gap-3">
               <button
-                onClick={() => dispatch(executeDelete())}
+                onClick={handleDelete}
+                disabled={deleteSpecialtyMutation.isPending}
                 className="flex-1 theme-danger-soft theme-text-danger font-bold py-3 rounded-xl theme-hover-danger-solid transition-all"
               >
                 حذف
               </button>
               <button
                 onClick={() => dispatch(closeDeleteDialog())}
+                disabled={deleteSpecialtyMutation.isPending}
                 className="flex-1 theme-bg theme-text font-bold py-3 rounded-xl"
               >
                 إلغاء

@@ -33,7 +33,9 @@ const SpecialtyCard = ({ data }) => {
             <EditOutlined className="cursor-pointer" fontSize="small" />
           </button>
           <button
-            onClick={() => dispatch(confirmDelete(data.id))}
+            onClick={() =>
+              dispatch(confirmDelete(data.uuid ?? data.id ?? data.legacyId))
+            }
             className="rounded-lg p-2 theme-text-danger theme-hover-danger"
           >
             <DeleteOutline className="cursor-pointer" fontSize="small" />
@@ -48,10 +50,22 @@ const SpecialtyCard = ({ data }) => {
       <div className="space-y-3">
         <PriceItem label="سعر الكشفية" price={data.price} />
         <PriceItem label="سعر المراجعة" price={data.followUpPrice} isMuted />
+        <PriceItem label="إجمالي المبلغ" price={data.amount} isMuted />
+        <CountItem label="عدد المواعيد" count={data.appointmentsCount} />
       </div>
     </Motion.div>
   );
 };
+
+const formatCurrency = (value = 0) =>
+  `${new Intl.NumberFormat("ar-SY", { maximumFractionDigits: 0 }).format(
+    Number(value) || 0,
+  )} ل.س`;
+
+const formatNumber = (value = 0) =>
+  new Intl.NumberFormat("ar-SY", { maximumFractionDigits: 0 }).format(
+    Number(value) || 0,
+  );
 
 const PriceItem = ({ label, price, isMuted }) => (
   <div
@@ -61,8 +75,15 @@ const PriceItem = ({ label, price, isMuted }) => (
     <span
       className={`font-bold ${isMuted ? "theme-text" : "theme-text-accent"}`}
     >
-      {price} ل.س
+      {formatCurrency(price)}
     </span>
+  </div>
+);
+
+const CountItem = ({ label, count }) => (
+  <div className="flex justify-between rounded-xl p-3 theme-bg">
+    <span className="text-sm theme-text-muted">{label}</span>
+    <span className="font-bold theme-text">{formatNumber(count)}</span>
   </div>
 );
 

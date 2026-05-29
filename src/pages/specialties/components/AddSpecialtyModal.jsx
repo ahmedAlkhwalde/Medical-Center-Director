@@ -1,11 +1,12 @@
 import { motion as Motion, AnimatePresence } from "framer-motion";
-import { Close } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  closeModal,
-  saveSpecialty,
-} from "../../../features/specialties/specialtiesSlice";
 import { useState } from "react";
+import { closeModal } from "../../../features/specialties/specialtiesSlice";
+import { showSnackbar } from "../../../features/uiSlice";
+import {
+  useCreateSpecialtyMutation,
+  useUpdateSpecialtyMutation,
+} from "../../../service/specialtiesService";
 
 const createInitialFormData = (editingItem) => ({
   name: editingItem?.name || "",
@@ -26,18 +27,58 @@ const AddSpecialtyModal = () => {
           key={editingItem ? editingItem.id : "new"}
           editingItem={editingItem}
           onClose={() => dispatch(closeModal())}
-          onSave={(formData) => dispatch(saveSpecialty(formData))}
         />
       )}
     </AnimatePresence>
   );
 };
 
-const ModalContent = ({ editingItem, onClose, onSave }) => {
+const ModalContent = ({ editingItem, onClose }) => {
   const [formData, setFormData] = useState(() =>
     createInitialFormData(editingItem),
   );
   const [errors, setErrors] = useState({});
+  const dispatch = useDispatch();
+  const createSpecialtyMutation = useCreateSpecialtyMutation({
+    onSuccess: () => {
+      dispatch(
+        showSnackbar({
+          message: "تمت إضافة الاختصاص بنجاح",
+          variant: "success",
+        }),
+      );
+      dispatch(closeModal());
+    },
+    onError: () => {
+      dispatch(
+        showSnackbar({
+          message: "تعذر إضافة الاختصاص حاليا",
+          variant: "error",
+        }),
+      );
+    },
+  });
+  const updateSpecialtyMutation = useUpdateSpecialtyMutation({
+    onSuccess: () => {
+      dispatch(
+        showSnackbar({
+          message: "تم تحديث الاختصاص بنجاح",
+          variant: "success",
+        }),
+      );
+      dispatch(closeModal());
+    },
+    onError: () => {
+      dispatch(
+        showSnackbar({
+          message: "تعذر تحديث الاختصاص حاليا",
+          variant: "error",
+        }),
+      );
+    },
+  });
+  const isSubmitting =
+    createSpecialtyMutation.isPending || updateSpecialtyMutation.isPending;
 
   const validate = () => {
     const newErrors = {};
@@ -56,13 +97,37 @@ const ModalContent = ({ editingItem, onClose, onSave }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (validate()) {
-      onSave(formData);
+    if (!validate() || isSubmitting) return;
+
+    const payload = {
+      name: formData.name.trim(),
+      checkpaid: Number(formData.price) || 0,
+      reviewpaid: Number(formData.followUpPrice) || 0,
+    };
+
+    if (editingItem) {
+      const targetId =
+        editingItem.uuid ?? editingItem.id ?? editingItem.legacyId;
+      if (!targetId) {
+        dispatch(
+          showSnackbar({
+            message: "معرّف الاختصاص غير متوفر للتعديل",
+            variant: "error",
+          }),
+        );
+        return;
+      }
+      dispatch(closeModal());
+      updateSpecialtyMutation.mutate({ id: targetId, payload });
+      return;
     }
+
+    dispatch(closeModal());
+    createSpecialtyMutation.mutate(payload);
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4">
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-3 sm:p-4">
       <Motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -86,6 +151,7 @@ const ModalContent = ({ editingItem, onClose, onSave }) => {
             value={formData.name}
             error={errors.name}
             placeholder="مثال: طب الأطفال"
+            disabled={isSubmitting}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           />
 
@@ -96,6 +162,7 @@ const ModalContent = ({ editingItem, onClose, onSave }) => {
               value={formData.price}
               error={errors.price}
               placeholder="مثال: 100"
+              disabled={isSubmitting}
               onChange={(e) =>
                 setFormData({ ...formData, price: e.target.value })
               }
@@ -106,6 +173,7 @@ const ModalContent = ({ editingItem, onClose, onSave }) => {
               value={formData.followUpPrice}
               error={errors.followUpPrice}
               placeholder="مثال: 50"
+              disabled={isSubmitting}
               onChange={(e) =>
                 setFormData({ ...formData, followUpPrice: e.target.value })
               }
@@ -115,6 +183,7 @@ const ModalContent = ({ editingItem, onClose, onSave }) => {
           <div className="pt-4 flex gap-3">
             <button
               type="submit"
+              disabled={isSubmitting}
               className="flex-1 theme-accent cursor-pointer theme-text-on-accent font-bold py-3 rounded-xl shadow-lg theme-shadow-accent"
             >
               {editingItem ? "تحديث البيانات" : "حفظ الاختصاص"}
@@ -122,6 +191,7 @@ const ModalContent = ({ editingItem, onClose, onSave }) => {
             <button
               type="button"
               onClick={onClose}
+              disabled={isSubmitting}
               className="flex-1 theme-bg theme-text cursor-pointer font-bold py-3 rounded-xl"
             >
               إلغاء
@@ -139,7 +209,7 @@ const InputField = ({ label, error, ...props }) => (
     <label className="text-xs font-bold theme-text-muted pr-1">{label}</label>
     <input
       {...props}
-      className={`w-full theme-bg border ${error ? "border-red-500" : "theme-border"} rounded-xl py-3 px-4 text-sm focus:ring-2 ring-[var(--color-accent)] outline-none transition-all`}
+      className={`w-full theme-bg border ${error ? "border-red-500" : "theme-border"} rounded-xl py-3 px-4 text-sm focus:ring-2 ring-(--color-accent) outline-none transition-all`}
     />
     {error && <p className="text-[10px] text-red-500 pr-1">{error}</p>}
   </div>

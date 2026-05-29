@@ -6,12 +6,16 @@ import {
   AttachMoneyOutlined,
   CategoryOutlined,
   PaymentsOutlined,
+  TrendingDownOutlined,
+  LocalFireDepartment,
+  RemoveCircleOutline,
   TrendingUpOutlined,
 } from "@mui/icons-material";
 import SpecialtyCard from "./components/SpecialtyCard";
 import AddSpecialtyModal from "./components/AddSpecialtyModal";
 import DeleteConfirmDialog from "./components/DeleteConfirmDialog";
 import { openModal } from "../../features/specialties/specialtiesSlice";
+import { useSpecialtiesQuery } from "../../service/specialtiesService";
 
 const formatCurrency = (value = 0) =>
   `${new Intl.NumberFormat("ar-SY", { maximumFractionDigits: 0 }).format(
@@ -19,9 +23,10 @@ const formatCurrency = (value = 0) =>
   )} ل.س`;
 
 const SpecialtiesPage = () => {
-  const { items } = useSelector((state) => state.specialties);
   const { searchQuery } = useSelector((state) => state.ui);
   const dispatch = useDispatch();
+  const { data: items = [], isLoading, isError } = useSpecialtiesQuery();
+  const isInitialLoading = isLoading && items.length === 0;
   const normalizedQuery = searchQuery.trim().toLowerCase();
   const visibleItems = normalizedQuery
     ? items.filter((item) => item.name.toLowerCase().includes(normalizedQuery))
@@ -32,13 +37,32 @@ const SpecialtiesPage = () => {
       (accumulator, item) => {
         const price = Number(item.price) || 0;
         const followUpPrice = Number(item.followUpPrice) || 0;
+        const appointmentsCount = Number(item.appointmentsCount) || 0;
 
         accumulator.price += price;
         accumulator.followUpPrice += followUpPrice;
         accumulator.highest = Math.max(accumulator.highest, price);
+        accumulator.lowest = Math.min(accumulator.lowest, price);
+        if (appointmentsCount >= accumulator.mostAppointments) {
+          accumulator.mostAppointments = appointmentsCount;
+          accumulator.mostRequested = item.name;
+        }
+        if (appointmentsCount <= accumulator.leastAppointments) {
+          accumulator.leastAppointments = appointmentsCount;
+          accumulator.leastRequested = item.name;
+        }
         return accumulator;
       },
-      { price: 0, followUpPrice: 0, highest: 0 },
+      {
+        price: 0,
+        followUpPrice: 0,
+        highest: 0,
+        lowest: Number.POSITIVE_INFINITY,
+        mostAppointments: -1,
+        leastAppointments: Number.POSITIVE_INFINITY,
+        mostRequested: "",
+        leastRequested: "",
+      },
     );
 
     const averagePrice = items.length
@@ -47,6 +71,9 @@ const SpecialtiesPage = () => {
     const averageFollowUpPrice = items.length
       ? Math.round(totals.followUpPrice / items.length)
       : 0;
+    const minPrice = items.length ? totals.lowest : 0;
+    const mostRequested = items.length ? totals.mostRequested : "غير متوفر";
+    const leastRequested = items.length ? totals.leastRequested : "غير متوفر";
 
     return [
       {
@@ -77,8 +104,54 @@ const SpecialtiesPage = () => {
         note: "أكبر قيمة مسجلة",
         icon: <TrendingUpOutlined />,
       },
+      {
+        id: 5,
+        label: "أقل سعر كشفية",
+        value: formatCurrency(minPrice),
+        note: "أدنى قيمة مسجلة",
+        icon: <TrendingDownOutlined />,
+      },
+      {
+        id: 6,
+        label: "الأكثر طلبا",
+        value: mostRequested || "غير متوفر",
+        note: "حسب عدد المواعيد",
+        icon: <LocalFireDepartment />,
+      },
+      {
+        id: 7,
+        label: "الأقل طلبا",
+        value: leastRequested || "غير متوفر",
+        note: "حسب عدد المواعيد",
+        icon: <RemoveCircleOutline />,
+      },
+      {
+        id: 1,
+        label: "إجمالي الاختصاصات",
+        value: items.length,
+        note: "جميع الأقسام المسجلة",
+        icon: <CategoryOutlined />,
+      },
     ];
   }, [items]);
+
+  const statsToRender = useMemo(() => {
+    const targetCount = 8;
+    const filled = [...stats];
+
+    for (let i = filled.length; i < targetCount; i += 1) {
+      filled.push({
+        id: `placeholder-${i}`,
+        label: "إحصائية إضافية",
+        value: "—",
+        note: "غير متوفر",
+        icon: <CategoryOutlined />,
+        isPlaceholder: true,
+      });
+    }
+
+    return filled;
+  }, [stats]);
 
   return (
     <section className="w-full min-w-0 space-y-6">
@@ -110,13 +183,13 @@ const SpecialtiesPage = () => {
         layout
         className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
       >
-        {stats.map((stat, index) => (
+        {statsToRender.map((stat, index) => (
           <Motion.div
             key={stat.id}
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05 }}
-            className="rounded-2xl border theme-border theme-surface p-4 shadow-sm sm:p-5"
+            className={`rounded-2xl border theme-border theme-surface p-4 shadow-sm sm:p-5 ${stat.isPlaceholder ? "opacity-70" : ""}`}
           >
             <div className="flex items-start justify-between gap-3">
               <div className="space-y-1 text-right">
@@ -141,7 +214,36 @@ const SpecialtiesPage = () => {
         className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-3 xl:gap-6"
       >
         <AnimatePresence mode="popLayout">
-          {visibleItems.length > 0 ? (
+          {isInitialLoading ? (
+            Array.from({ length: 6 }).map((_, index) => (
+              <div
+                key={`skeleton-${index}`}
+                className="rounded-2xl border theme-border theme-surface p-4 shadow-sm sm:p-5 animate-pulse"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-2 text-right">
+                    <div className="h-3 w-24 rounded-full bg-slate-200/80 dark:bg-slate-700/60" />
+                    <div className="h-6 w-32 rounded-full bg-slate-200/70 dark:bg-slate-700/50" />
+                    <div className="h-3 w-20 rounded-full bg-slate-200/60 dark:bg-slate-700/40" />
+                  </div>
+                  <div className="h-12 w-12 rounded-xl bg-slate-200/70 dark:bg-slate-700/50" />
+                </div>
+                <div className="mt-4 space-y-3">
+                  <div className="h-10 rounded-xl bg-slate-200/60 dark:bg-slate-700/40" />
+                  <div className="h-10 rounded-xl bg-slate-200/50 dark:bg-slate-700/30" />
+                </div>
+              </div>
+            ))
+          ) : isError ? (
+            <div className="col-span-full rounded-3xl border theme-border theme-surface p-6 text-center shadow-sm sm:p-8">
+              <p className="text-base font-bold theme-text-accent sm:text-lg">
+                حدث خطأ أثناء تحميل الاختصاصات
+              </p>
+              <p className="mt-2 text-sm theme-text-muted">
+                حاول مرة أخرى بعد قليل.
+              </p>
+            </div>
+          ) : visibleItems.length > 0 ? (
             visibleItems.map((item, index) => (
               <SpecialtyCard key={item.id} data={item} index={index} />
             ))

@@ -7,6 +7,7 @@ import {
   saveDoctor,
   CLINIC_OPTIONS,
 } from "../../../features/doctors/doctorsSlice";
+import { useSpecialtiesQuery } from "../../../service/specialtiesService";
 
 const getTodayISODate = () => {
   const now = new Date();
@@ -30,8 +31,8 @@ const createInitialFormData = (editingDoctor) => ({
 
 const AddDoctorModal = () => {
   const { isModalOpen, editingDoctor } = useSelector((state) => state.doctors);
-  const { items: specialties } = useSelector((state) => state.specialties);
   const dispatch = useDispatch();
+  const { data: specialties = [] } = useSpecialtiesQuery();
 
   return (
     <AnimatePresence>
@@ -96,12 +97,16 @@ const ModalContent = ({ editingDoctor, specialties, onClose, onSave }) => {
 
     if (!formData.specialtyId) {
       newErrors.specialtyId = "الاختصاص مطلوب";
-    } else if (
-      !specialties.some(
-        (specialty) => String(specialty.id) === String(formData.specialtyId),
-      )
-    ) {
-      newErrors.specialtyId = "الاختصاص يجب أن يكون ضمن القائمة";
+    } else {
+      const hasMatch = specialties.some((specialty) =>
+        [specialty?.id, specialty?.legacyId, specialty?.uuid].some(
+          (value) =>
+            value != null && String(value) === String(formData.specialtyId),
+        ),
+      );
+      if (!hasMatch) {
+        newErrors.specialtyId = "الاختصاص يجب أن يكون ضمن القائمة";
+      }
     }
 
     setErrors(newErrors);
@@ -212,11 +217,15 @@ const ModalContent = ({ editingDoctor, specialties, onClose, onSave }) => {
               }
             >
               <option value="">اختر الاختصاص</option>
-              {specialties.map((specialty) => (
-                <option key={specialty.id} value={specialty.id}>
-                  {specialty.name}
-                </option>
-              ))}
+              {specialties.map((specialty) => {
+                const optionValue =
+                  specialty.legacyId ?? specialty.id ?? specialty.uuid;
+                return (
+                  <option key={optionValue} value={optionValue}>
+                    {specialty.name}
+                  </option>
+                );
+              })}
             </SelectField>
           </div>
 

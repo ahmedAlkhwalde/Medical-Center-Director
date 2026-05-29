@@ -85,10 +85,11 @@ const specialtiesSlice = createSlice({
     },
     // 4. الإضافة (للتوافق مع ملف AddSpecialtyModal القديم)
     addSpecialty: (state, action) => {
+      const nextId = action.payload?.id ?? Date.now();
       state.items.push({
         ...action.payload,
         icon: action.payload.icon || inferSpecialtyIcon(action.payload.name),
-        id: Date.now(),
+        id: nextId,
       });
       state.isModalOpen = false;
     },
@@ -108,10 +109,29 @@ const specialtiesSlice = createSlice({
             id: state.editingItem.id,
           };
       } else {
-        state.items.push({ ...action.payload, icon, id: Date.now() });
+        const nextId = action.payload?.id ?? Date.now();
+        state.items.push({ ...action.payload, icon, id: nextId });
       }
       state.isModalOpen = false;
       state.editingItem = null;
+    },
+    updateSpecialtyById: (state, action) => {
+      const { id, changes } = action.payload;
+      const index = state.items.findIndex((item) => item.id === id);
+      if (index === -1) return;
+
+      const icon =
+        changes.icon ||
+        inferSpecialtyIcon(changes.name || state.items[index].name);
+
+      state.items[index] = {
+        ...state.items[index],
+        ...changes,
+        icon,
+      };
+    },
+    removeSpecialtyById: (state, action) => {
+      state.items = state.items.filter((item) => item.id !== action.payload);
     },
     // 6. الحذف
     confirmDelete: (state, action) => {
@@ -136,6 +156,8 @@ export const {
   toggleModal,
   addSpecialty,
   saveSpecialty,
+  updateSpecialtyById,
+  removeSpecialtyById,
   confirmDelete,
   executeDelete,
   closeDeleteDialog,

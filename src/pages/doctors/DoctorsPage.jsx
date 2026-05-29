@@ -18,6 +18,7 @@ import {
   openModal,
   toggleDoctorStatus,
 } from "../../features/doctors/doctorsSlice";
+import { useSpecialtiesQuery } from "../../service/specialtiesService";
 
 const normalizeSearchText = (value = "") =>
   value
@@ -32,15 +33,25 @@ const DoctorsPage = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const { doctors } = useSelector((state) => state.doctors);
-  const { items: specialties } = useSelector((state) => state.specialties);
   const { searchQuery } = useSelector((state) => state.ui);
   const [selectedSpecialtyId, setSelectedSpecialtyId] = useState("");
+  const { data: specialties = [] } = useSpecialtiesQuery();
 
-  const specialtyMap = useMemo(
-    () =>
-      new Map(specialties.map((specialty) => [specialty.id, specialty.name])),
-    [specialties],
-  );
+  const specialtyMap = useMemo(() => {
+    const map = new Map();
+    specialties.forEach((specialty) => {
+      if (specialty?.id != null) {
+        map.set(String(specialty.id), specialty.name);
+      }
+      if (specialty?.legacyId != null) {
+        map.set(String(specialty.legacyId), specialty.name);
+      }
+      if (specialty?.uuid != null) {
+        map.set(String(specialty.uuid), specialty.name);
+      }
+    });
+    return map;
+  }, [specialties]);
 
   const normalizedSearchQuery = useMemo(
     () => normalizeSearchText(searchQuery),
@@ -49,7 +60,7 @@ const DoctorsPage = () => {
 
   const filteredDoctors = useMemo(() => {
     return doctors.filter((doctor) => {
-      const specialtyName = specialtyMap.get(doctor.specialtyId) || "";
+      const specialtyName = specialtyMap.get(String(doctor.specialtyId)) || "";
       const clinicLabel =
         CLINIC_OPTIONS.find((clinic) => clinic.id === doctor.clinicId)?.label ||
         `عيادة رقم ${doctor.clinicId}`;
@@ -148,11 +159,15 @@ const DoctorsPage = () => {
                 className="w-full cursor-pointer appearance-none rounded-xl border theme-border theme-surface py-3 pr-12  text-sm font-bold theme-text shadow-sm outline-none transition-all focus:ring-2 focus:ring-(--color-accent)"
               >
                 <option value="">كل الاختصاصات</option>
-                {specialties.map((specialty) => (
-                  <option key={specialty.id} value={specialty.id}>
-                    {specialty.name}
-                  </option>
-                ))}
+                {specialties.map((specialty) => {
+                  const optionValue =
+                    specialty.legacyId ?? specialty.id ?? specialty.uuid;
+                  return (
+                    <option key={optionValue} value={optionValue}>
+                      {specialty.name}
+                    </option>
+                  );
+                })}
               </select>
             </div>
 
