@@ -68,7 +68,8 @@ const ModalContent = ({ editingItem, onClose }) => {
       );
       dispatch(closeModal());
     },
-    onError: () => {
+    onError: (e) => {
+      console.log(e);
       dispatch(
         showSnackbar({
           message: "تعذر تحديث الاختصاص حاليا",
@@ -106,8 +107,7 @@ const ModalContent = ({ editingItem, onClose }) => {
     };
 
     if (editingItem) {
-      const targetId =
-        editingItem.uuid ?? editingItem.id ?? editingItem.legacyId;
+      const targetId = editingItem.uuid;
       if (!targetId) {
         dispatch(
           showSnackbar({
@@ -118,7 +118,7 @@ const ModalContent = ({ editingItem, onClose }) => {
         return;
       }
       dispatch(closeModal());
-      updateSpecialtyMutation.mutate({ id: targetId, payload });
+      updateSpecialtyMutation.mutate({ uuid: targetId, payload });
       return;
     }
 

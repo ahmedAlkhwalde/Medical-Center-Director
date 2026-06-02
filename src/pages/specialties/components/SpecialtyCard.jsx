@@ -34,7 +34,7 @@ const SpecialtyCard = ({ data }) => {
           </button>
           <button
             onClick={() =>
-              dispatch(confirmDelete(data.uuid ?? data.id ?? data.legacyId))
+              dispatch(confirmDelete(data.uuid))
             }
             className="rounded-lg p-2 theme-text-danger theme-hover-danger"
           >
