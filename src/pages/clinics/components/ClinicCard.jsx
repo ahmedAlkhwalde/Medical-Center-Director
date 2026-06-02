@@ -11,7 +11,8 @@ import {
   openModal,
 } from "../../../features/clinics/clinicsSlice";
 
-const ClinicCard = ({ data, index }) => {
+
+const ClinicCard = ({ data }) => {
   const dispatch = useDispatch();
 
   return (
@@ -46,6 +47,7 @@ const ClinicCard = ({ data, index }) => {
           <button
             type="button"
             onClick={() => dispatch(openModal(data))}
+            disabled={data.isOptimistic}
             className="cursor-pointer rounded-lg p-2 theme-text-accent theme-hover-accent"
             aria-label="تعديل العيادة"
             title="تعديل العيادة"
@@ -54,7 +56,16 @@ const ClinicCard = ({ data, index }) => {
           </button>
           <button
             type="button"
-            onClick={() => dispatch(confirmDelete(data.id))}
+            onClick={() =>
+              dispatch(
+                confirmDelete({
+                  id: data.uuid ?? data.id ?? data.legacyId,
+                  isOptimistic: data.isOptimistic,
+                  clinicName: data.clinicName,
+                }),
+              )
+            }
+            disabled={data.isOptimistic}
             className="cursor-pointer rounded-lg p-2 theme-text-danger theme-hover-danger"
             aria-label="حذف العيادة"
             title="حذف العيادة"
@@ -77,8 +88,25 @@ const ClinicCard = ({ data, index }) => {
           </div>
         </div>
       </div>
+
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        <InfoPill label="عدد الأطباء" value={data.doctorsCount} />
+        <InfoPill label="عدد المواعيد" value={data.appointmentsCount} />
+      </div>
     </Motion.div>
   );
 };
+
+const formatNumber = (value = 0) =>
+  new Intl.NumberFormat("ar-SY", { maximumFractionDigits: 0 }).format(
+    Number(value) || 0,
+  );
+
+const InfoPill = ({ label, value }) => (
+  <div className="rounded-xl theme-bg px-3 py-2 text-right">
+    <p className="text-[11px] font-bold theme-text-muted">{label}</p>
+    <p className="text-sm font-bold theme-text">{formatNumber(value)}</p>
+  </div>
+);
 
 export default ClinicCard;

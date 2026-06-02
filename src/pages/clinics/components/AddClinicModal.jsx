@@ -2,7 +2,12 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { motion as Motion, AnimatePresence } from "framer-motion";
 import { Close } from "@mui/icons-material";
-import { closeModal, saveClinic } from "../../../features/clinics/clinicsSlice";
+import { closeModal } from "../../../features/clinics/clinicsSlice";
+import { showSnackbar } from "../../../features/uiSlice";
+import {
+  useCreateClinicMutation,
+  useUpdateClinicMutation,
+} from "../../../service/clinicsService";
 
 const createInitialFormData = (editingItem) => ({
   clinicName: editingItem?.clinicName || "",
@@ -20,18 +25,58 @@ const AddClinicModal = () => {
           key={editingItem ? editingItem.id : "new"}
           editingItem={editingItem}
           onClose={() => dispatch(closeModal())}
-          onSave={(formData) => dispatch(saveClinic(formData))}
         />
       )}
     </AnimatePresence>
   );
 };
 
-const ModalContent = ({ editingItem, onClose, onSave }) => {
+const ModalContent = ({ editingItem, onClose }) => {
   const [formData, setFormData] = useState(() =>
     createInitialFormData(editingItem),
   );
   const [errors, setErrors] = useState({});
+  const dispatch = useDispatch();
+  const createClinicMutation = useCreateClinicMutation({
+    onSuccess: () => {
+      dispatch(
+        showSnackbar({
+          message: "تمت إضافة العيادة بنجاح",
+          variant: "success",
+        }),
+      );
+      dispatch(closeModal());
+    },
+    onError: () => {
+      dispatch(
+        showSnackbar({
+          message: "تعذر إضافة العيادة حاليا",
+          variant: "error",
+        }),
+      );
+    },
+  });
+  const updateClinicMutation = useUpdateClinicMutation({
+    onSuccess: () => {
+      dispatch(
+        showSnackbar({
+          message: "تم تحديث العيادة بنجاح",
+          variant: "success",
+        }),
+      );
+      dispatch(closeModal());
+    },
+    onError: () => {
+      dispatch(
+        showSnackbar({
+          message: "تعذر تحديث العيادة حاليا",
+          variant: "error",
+        }),
+      );
+    },
+  });
+  const isSubmitting =
+    createClinicMutation.isPending || updateClinicMutation.isPending;
 
   const validate = () => {
     const newErrors = {};
@@ -51,13 +96,47 @@ const ModalContent = ({ editingItem, onClose, onSave }) => {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    if (validate()) {
-      onSave(formData);
+    if (!validate() || isSubmitting) return;
+
+    const payload = {
+      clinicName: formData.clinicName.trim(),
+      name: formData.clinicName.trim(),
+      clinic_name: formData.clinicName.trim(),
+      address: formData.address.trim(),
+    };
+
+    if (editingItem) {
+      if (editingItem.isOptimistic) {
+        dispatch(
+          showSnackbar({
+            message: "انتظر اكتمال المزامنة قبل التعديل",
+            variant: "info",
+          }),
+        );
+        return;
+      }
+      const targetId =
+        editingItem.uuid;
+      if (!targetId) {
+        dispatch(
+          showSnackbar({
+            message: "معرّف العيادة غير متوفر للتعديل",
+            variant: "error",
+          }),
+        );
+        return;
+      }
+      dispatch(closeModal());
+      updateClinicMutation.mutate({ uuid: targetId, payload });
+      return;
     }
+
+    dispatch(closeModal());
+    createClinicMutation.mutate(payload);
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4">
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-3 sm:p-4">
       <Motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -98,6 +177,7 @@ const ModalContent = ({ editingItem, onClose, onSave }) => {
             value={formData.clinicName}
             error={errors.clinicName}
             placeholder="مثال: عيادة الشفاء - المزة"
+            disabled={isSubmitting}
             onChange={(event) =>
               setFormData({ ...formData, clinicName: event.target.value })
             }
@@ -108,6 +188,7 @@ const ModalContent = ({ editingItem, onClose, onSave }) => {
             value={formData.address}
             error={errors.address}
             placeholder="مثال: دمشق - المزة - شارع الفيلات"
+            disabled={isSubmitting}
             onChange={(event) =>
               setFormData({ ...formData, address: event.target.value })
             }
@@ -116,6 +197,7 @@ const ModalContent = ({ editingItem, onClose, onSave }) => {
           <div className="flex flex-col gap-3 pt-2 sm:flex-row">
             <button
               type="submit"
+              disabled={isSubmitting}
               className="flex-1 cursor-pointer rounded-xl theme-accent px-5 py-3 font-bold theme-text-on-accent shadow-lg theme-shadow-accent"
             >
               {editingItem ? "تحديث البيانات" : "حفظ العيادة"}
@@ -123,6 +205,7 @@ const ModalContent = ({ editingItem, onClose, onSave }) => {
             <button
               type="button"
               onClick={onClose}
+              disabled={isSubmitting}
               className="flex-1 cursor-pointer rounded-xl theme-bg px-5 py-3 font-bold theme-text"
             >
               إلغاء

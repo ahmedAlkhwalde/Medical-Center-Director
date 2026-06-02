@@ -1,13 +1,63 @@
 import { motion as Motion, AnimatePresence } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  executeDelete,
-  closeDeleteDialog,
-} from "../../../features/clinics/clinicsSlice";
+import { closeDeleteDialog } from "../../../features/clinics/clinicsSlice";
+import { showSnackbar } from "../../../features/uiSlice";
+import { useDeleteClinicMutation } from "../../../service/clinicsService";
 
 const DeleteClinicDialog = () => {
-  const { isDeleteDialogOpen } = useSelector((state) => state.clinics);
+  const { isDeleteDialogOpen, itemToDelete } = useSelector(
+    (state) => state.clinics,
+  );
   const dispatch = useDispatch();
+
+  const deleteClinicMutation = useDeleteClinicMutation({
+    onSuccess: () => {
+      // 💡 ننقل إغلاق المودال إلى هنا بعد نجاح العملية تماماً لضمان استقرار حالة البيانات
+      dispatch(closeDeleteDialog());
+      dispatch(
+        showSnackbar({
+          message: "تم حذف العيادة بنجاح",
+          variant: "success",
+        }),
+      );
+    },
+    onError: () => {
+      dispatch(
+        showSnackbar({
+          message: "تعذر حذف العيادة حاليا",
+          variant: "error",
+        }),
+      );
+    },
+  });
+
+  const handleDelete = () => {
+    if (!itemToDelete || deleteClinicMutation.isPending) return;
+
+    if (itemToDelete?.isOptimistic) {
+      dispatch(closeDeleteDialog());
+      dispatch(
+        showSnackbar({
+          message: "انتظر اكتمال المزامنة قبل الحذف",
+          variant: "info",
+        }),
+      );
+      return;
+    }
+
+   
+    const uuid = itemToDelete?.uuid ?? itemToDelete?.id;
+
+    if (!uuid || String(uuid).startsWith('temp-')) {
+      dispatch(showSnackbar({ message: "معرف العيادة غير صالح", variant: "error" }));
+      return;
+    }
+
+    // 🚀 نرسل الـ uuid صراحة للـ Mutation
+    deleteClinicMutation.mutate(uuid);
+    
+    dispatch(closeDeleteDialog());
+  };
 
   return (
     <AnimatePresence>
@@ -39,13 +89,15 @@ const DeleteClinicDialog = () => {
             </p>
             <div className="flex gap-3">
               <button
-                onClick={() => dispatch(executeDelete())}
+                onClick={handleDelete}
+                disabled={deleteClinicMutation.isPending}
                 className="flex-1 rounded-xl theme-danger-soft py-3 font-bold theme-text-danger transition-all theme-hover-danger-solid"
               >
-                حذف
+                {deleteClinicMutation.isPending ? "جاري الحذف..." : "حذف"}
               </button>
               <button
                 onClick={() => dispatch(closeDeleteDialog())}
+                disabled={deleteClinicMutation.isPending}
                 className="flex-1 rounded-xl theme-bg py-3 font-bold theme-text"
               >
                 إلغاء

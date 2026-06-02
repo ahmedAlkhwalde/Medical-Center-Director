@@ -4,14 +4,14 @@ import { motion as Motion, AnimatePresence } from "framer-motion";
 import {
   Add,
   BusinessOutlined,
-  LocationCityOutlined,
-  MapOutlined,
-  NotesOutlined,
+  LocalFireDepartment,
+  PeopleOutline,
 } from "@mui/icons-material";
 import ClinicCard from "./components/ClinicCard";
 import AddClinicModal from "./components/AddClinicModal";
 import DeleteClinicDialog from "./components/DeleteClinicDialog";
 import { openModal } from "../../features/clinics/clinicsSlice";
+import { useClinicsQuery } from "../../service/clinicsService";
 
 const normalizeSearchText = (value = "") =>
   value
@@ -23,8 +23,10 @@ const normalizeSearchText = (value = "") =>
 
 const ClinicsPage = () => {
   const dispatch = useDispatch();
-  const { items } = useSelector((state) => state.clinics);
   const { searchQuery } = useSelector((state) => state.ui);
+  const { data, isLoading, isError } = useClinicsQuery();
+  const items = data?.items ?? [];
+  const apiStats = data?.stats ?? {};
 
   const normalizedQuery = useMemo(
     () => normalizeSearchText(searchQuery),
@@ -46,68 +48,54 @@ const ClinicsPage = () => {
   }, [items, normalizedQuery]);
 
   const stats = useMemo(() => {
-    const cityCounts = new Map();
-    const districtCounts = new Map();
-
-    items.forEach((item) => {
-      const parts = item.address
-        .split("-")
-        .map((part) => part.trim())
-        .filter(Boolean);
-
-      const city = parts[0];
-      const district = parts[1];
-
-      if (city) {
-        cityCounts.set(city, (cityCounts.get(city) || 0) + 1);
-      }
-
-      if (district) {
-        districtCounts.set(district, (districtCounts.get(district) || 0) + 1);
-      }
-    });
-
-    const averageAddressLength = items.length
-      ? Math.round(
-          items.reduce(
-            (sum, item) =>
-              sum + item.address.split(/\s+/).filter(Boolean).length,
-            0,
-          ) / items.length,
-        )
-      : 0;
+    const totalCount = apiStats.total_clinics_count ?? items.length;
+    const mostBusyClinic =
+      apiStats.most_busy_clinic ||
+      items.reduce(
+        (current, item) =>
+          (item.appointmentsCount ?? 0) > (current?.appointmentsCount ?? -1)
+            ? item
+            : current,
+        null,
+      )?.clinicName ||
+      "غير متوفر";
+    const averageDoctors =
+      apiStats.avg_doctors_per_clinic ??
+      (items.length
+        ? (
+            items.reduce(
+              (sum, item) => sum + (Number(item.doctorsCount) || 0),
+              0,
+            ) / items.length
+          ).toFixed(1)
+        : 0);
 
     return [
       {
         id: 1,
         label: "إجمالي العيادات",
-        value: items.length,
+        value: totalCount,
         note: "عدد السجلات المسجلة",
         icon: <BusinessOutlined />,
       },
       {
         id: 2,
-        label: "المدن المختلفة",
-        value: cityCounts.size,
-        note: "أماكن انتشار العيادات",
-        icon: <LocationCityOutlined />,
+        label: "الأكثر ازدحاما",
+        value: mostBusyClinic || "غير متوفر",
+        note: "حسب عدد المواعيد",
+        icon: <LocalFireDepartment />,
       },
       {
         id: 3,
-        label: "المناطق المختلفة",
-        value: districtCounts.size,
-        note: "الأحياء والمناطق المسجلة",
-        icon: <MapOutlined />,
-      },
-      {
-        id: 4,
-        label: "متوسط كلمات العنوان",
-        value: averageAddressLength,
-        note: "مؤشر على طول العناوين",
-        icon: <NotesOutlined />,
+        label: "متوسط الأطباء",
+        value: Math.round(averageDoctors),
+        note: "أطباء لكل عيادة",
+        icon: <PeopleOutline />,
       },
     ];
-  }, [items]);
+  }, [apiStats, items]);
+
+  const isInitialLoading = isLoading && items.length === 0;
 
   return (
     <section className="w-full min-w-0 space-y-6">
@@ -171,7 +159,35 @@ const ClinicsPage = () => {
         className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-3 xl:gap-6"
       >
         <AnimatePresence mode="popLayout">
-          {visibleItems.length > 0 ? (
+          {isInitialLoading ? (
+            Array.from({ length: 6 }).map((_, index) => (
+              <div
+                key={`clinic-skeleton-${index}`}
+                className="rounded-2xl border theme-border theme-surface p-4 shadow-sm sm:p-5 animate-pulse"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-2 text-right">
+                    <div className="h-3 w-24 rounded-full bg-slate-200/80 dark:bg-slate-700/60" />
+                    <div className="h-6 w-36 rounded-full bg-slate-200/70 dark:bg-slate-700/50" />
+                  </div>
+                  <div className="h-10 w-10 rounded-xl bg-slate-200/70 dark:bg-slate-700/50" />
+                </div>
+                <div className="mt-4 space-y-3">
+                  <div className="h-16 rounded-xl bg-slate-200/60 dark:bg-slate-700/40" />
+                  <div className="h-10 rounded-xl bg-slate-200/50 dark:bg-slate-700/30" />
+                </div>
+              </div>
+            ))
+          ) : isError ? (
+            <div className="col-span-full rounded-3xl border theme-border theme-surface p-6 text-center shadow-sm sm:p-8">
+              <p className="text-base font-bold theme-text-accent sm:text-lg">
+                حدث خطأ أثناء تحميل العيادات
+              </p>
+              <p className="mt-2 text-sm theme-text-muted">
+                حاول مرة أخرى بعد قليل.
+              </p>
+            </div>
+          ) : visibleItems.length > 0 ? (
             visibleItems.map((item, index) => (
               <ClinicCard key={item.id} data={item} index={index} />
             ))
