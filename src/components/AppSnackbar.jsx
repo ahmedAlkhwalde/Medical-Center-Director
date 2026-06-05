@@ -55,7 +55,7 @@ export default function AppSnackbar({
   const Icon = VARIANT_ICONS[variant] || VARIANT_ICONS.success;
 
   const content = (
-    <div className="fixed bottom-5 left-5 z-5000 pointer-events-none">
+    <div className="fixed bottom-5 left-5 z-50000 pointer-events-none">
       <div
         role="status"
         aria-live="polite"

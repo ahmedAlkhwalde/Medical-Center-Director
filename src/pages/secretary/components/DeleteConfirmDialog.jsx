@@ -1,83 +1,36 @@
 import { motion as Motion, AnimatePresence } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
 import { closeDeleteDialog } from "../../../features/secretaries/secretariesSlice";
-import { showSnackbar } from "../../../features/uiSlice";
-import {
-  useDeleteSecretaryMutation,
-  useActivateSecretaryMutation,
-} from "../../../service/secretariesService";
+import { useUpdateSecretaryStatusMutation } from "../../../service/secretariesService";
 
 const DeleteConfirmDialog = () => {
   const { isDeleteDialogOpen, itemToDelete } = useSelector(
     (state) => state.secretaries,
   );
   const dispatch = useDispatch();
-  const deleteSecretaryMutation = useDeleteSecretaryMutation();
-  const activateSecretaryMutation = useActivateSecretaryMutation();
 
+  // استدعاء الهوك الموحد
+  const statusMutation = useUpdateSecretaryStatusMutation({
+    onSuccess: () => {
+      // 💡 الحل الجذري: بمجرد نجاح العملية في السيرفر، نغلق الـ Dialog فوراً ليختفي من الشاشة
+      dispatch(closeDeleteDialog());
+    }
+  });
+
+  const isPending = statusMutation.isPending;
+  const targetUuid = itemToDelete?.uuid || itemToDelete?.id;
+  
+  // قراءة الحالة الممررة عند الضغط على الزر في الجدول
+  const isActive = Boolean(itemToDelete?.isActive);
   const selectedItemName = itemToDelete?.name;
-  console.debug(
-    "DeleteConfirmDialog: itemToDelete",
-    itemToDelete,
-    "deletePending",
-    deleteSecretaryMutation.isPending,
-    "activatePending",
-    activateSecretaryMutation.isPending,
-  );
 
   const handleToggleActive = () => {
-    const isActive = Boolean(itemToDelete?.isActive);
-    const mutation = isActive
-      ? deleteSecretaryMutation
-      : activateSecretaryMutation;
+    if (!targetUuid || isPending) return;
 
-    if (!itemToDelete || mutation.isPending) return;
-    if (itemToDelete?.isOptimistic) {
-      dispatch(closeDeleteDialog());
-      dispatch(
-        showSnackbar({
-          message: "انتظر اكتمال المزامنة بعد تغيير الحالة",
-          variant: "info",
-        }),
-      );
-      return;
-    }
-    if (!itemToDelete?.id) {
-      dispatch(
-        showSnackbar({
-          message: "معرّف السكرتير غير متوفر",
-          variant: "error",
-        }),
-      );
-      return;
-    }
-
-    const successMessage = isActive
-      ? "تم إلغاء تفعيل الحساب بنجاح"
-      : "تم تفعيل الحساب بنجاح";
-    const errorMessage = isActive
-      ? "تعذر إلغاء تفعيل الحساب حاليا"
-      : "تعذر تفعيل الحساب حاليا";
-
-    dispatch(closeDeleteDialog());
-
-    mutation.mutate(Number(itemToDelete.id), {
-      onSuccess: () => {
-        dispatch(
-          showSnackbar({
-            message: successMessage,
-            variant: "success",
-          }),
-        );
-      },
-      onError: () => {
-        dispatch(
-          showSnackbar({
-            message: errorMessage,
-            variant: "error",
-          }),
-        );
-      },
+    // إرسال طلب عكس الحالة الحالية الحية للسيرفر (0 للمعطل و 1 للمفعل)
+    statusMutation.mutate({
+      uuid: targetUuid,
+      active: isActive ? 0 : 1
     });
   };
 
@@ -85,57 +38,79 @@ const DeleteConfirmDialog = () => {
     <AnimatePresence>
       {isDeleteDialogOpen && (
         <div
-          className="fixed inset-0 flex items-center justify-center p-3 sm:p-4"
-          style={{ zIndex: 100 }}
+          className="fixed inset-0 z-[10000] flex items-center justify-center p-4 overflow-x-hidden overflow-y-auto"
         >
+          {/* الخلفية الموضببة الهادئة */}
           <Motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => dispatch(closeDeleteDialog())}
-            className="absolute inset-0 theme-overlay backdrop-blur-sm"
+            onClick={() => !isPending && dispatch(closeDeleteDialog())}
+            className="fixed inset-0 theme-overlay backdrop-blur-md"
           />
 
+          {/* جسد الـ Dialog الفاخر */}
           <Motion.div
-            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            initial={{ scale: 0.95, opacity: 0, y: 15 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            className="theme-surface relative z-10 w-full max-w-sm rounded-3xl p-5 text-center shadow-2xl sm:p-8"
+            exit={{ scale: 0.95, opacity: 0, y: 15 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="theme-surface relative z-10 w-full max-w-sm rounded-3xl p-6 text-center shadow-2xl border theme-border sm:p-8"
           >
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full theme-danger-soft text-3xl theme-text-danger">
-              !
+            {/* الأيقونة تتحدد بناءً على حالة العنصر المفتوح حالياً */}
+            <div className={`mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full text-4xl border ${
+              isActive 
+                ? "bg-amber-500/10 text-amber-500 border-amber-500/20" 
+                : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+            }`}>
+              {isActive ? "⚠️" : "🔒"}
             </div>
-            <h3 className="text-xl font-bold theme-text">هل أنت متأكد؟</h3>
-            <p className="mt-3 text-sm theme-text-muted">
-              سيتم {itemToDelete?.isActive ? "إلغاء تفعيل" : "تفعيل"} حساب{" "}
-              <span className="font-bold theme-text-accent">
+
+            {/* نصوص ذكية تتغير حسب حالة الحساب الحالية */}
+            <h3 className="text-2xl font-black tracking-tight theme-text">
+              {isActive ? "تعطيل الحساب؟" : "تفعيل الحساب؟"}
+            </h3>
+            
+            <p className="mt-3 text-sm leading-relaxed theme-text-muted px-2">
+              أنت على وشك تغيير حالة حساب السكرتير{" "}
+              <span className="font-bold theme-text-accent block text-base mt-1">
                 {selectedItemName || "هذا السجل"}
               </span>
-              .
+              سيؤدي هذا إلى {isActive ? "حظر دخوله المؤقت للنظام" : "السماح له بالوصول للوحة التحكم"}.
             </p>
 
-            <div className="mt-6 flex gap-3">
+            {/* أزرار التحكم الفورية */}
+            <div className="mt-8 flex gap-3">
               <button
                 type="button"
+                disabled={isPending}
                 onClick={handleToggleActive}
-                disabled={
-                  itemToDelete?.isActive
-                    ? deleteSecretaryMutation.isPending
-                    : activateSecretaryMutation.isPending
-                }
-                className="flex-1 cursor-pointer rounded-xl py-3 font-bold theme-text-on-accent theme-accent theme-shadow-accent"
+                className={`flex-[2] flex items-center justify-center gap-2 cursor-pointer rounded-xl py-3.5 font-bold shadow-lg transition-all duration-200 active:scale-[0.98] disabled:opacity-60 ${
+                  isActive
+                    ? "bg-amber-600 hover:bg-amber-700 text-white shadow-amber-600/20"
+                    : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20"
+                }`}
               >
-                {itemToDelete?.isActive ? "إلغاء التفعيل" : "تفعيل"}
+                {isPending ? (
+                  <>
+                    <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    <span>جاري الحفظ...</span>
+                  </>
+                ) : isActive ? (
+                  "تأكيد التعطيل"
+                ) : (
+                  "تأكيد التفعيل"
+                )}
               </button>
+
               <button
                 type="button"
+                disabled={isPending}
                 onClick={() => dispatch(closeDeleteDialog())}
-                disabled={
-                  itemToDelete?.isActive
-                    ? deleteSecretaryMutation.isPending
-                    : activateSecretaryMutation.isPending
-                }
-                className="flex-1 cursor-pointer rounded-xl py-3 font-bold theme-bg theme-text"
+                className="flex-1 cursor-pointer rounded-xl py-3.5 font-bold border theme-border theme-bg theme-text hover:bg-black/5 dark:hover:bg-white/5 transition-colors duration-200 disabled:opacity-40"
               >
                 إلغاء
               </button>

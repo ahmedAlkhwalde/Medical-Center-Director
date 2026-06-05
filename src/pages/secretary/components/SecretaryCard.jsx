@@ -5,13 +5,13 @@ import {
   PaymentsOutlined,
   PersonOutline,
   PhoneOutlined,
-  ToggleOffOutlined,
-  ToggleOnOutlined,
+  ToggleOffOutlined, // أيقونة التعطيل
+  ToggleOnOutlined,  // 💡 إضافة أيقونة التفعيل
 } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
 import {
   openModal,
-  toggleSecretaryStatus,
+  confirmDelete,
 } from "../../../features/secretaries/secretariesSlice";
 import { formatSalary } from "../secretaryFormatters";
 
@@ -42,17 +42,40 @@ const SecretaryCard = ({ data, index }) => {
           <button
             type="button"
             onClick={() => dispatch(openModal(data))}
+            disabled={data.isOptimistic}
             className="rounded-lg p-2 theme-text-accent theme-hover-accent"
           >
             <EditOutlined className="cursor-pointer" fontSize="small" />
           </button>
+          
+          {/* 💡 تعديل الزر ليصبح تفاعلياً في الحالتين (تفعيل / تعطيل) */}
           <button
             type="button"
-            onClick={() => dispatch(toggleSecretaryStatus(data.id))}
-            className={`rounded-lg p-2 ${data.isActive ? "theme-text-danger theme-hover-danger" : "theme-text-accent theme-hover-accent"}`}
-            aria-label={data.isActive ? "إلغاء التفعيل" : "تفعيل السكرتير"}
-            title={data.isActive ? "إلغاء التفعيل" : "تفعيل السكرتير"}
+            onClick={() =>
+              dispatch(
+                confirmDelete({
+                  id: data.id,
+                  uuid: data.uuid, // تمرير الـ uuid أيضاً للاحتياط
+                  name: data.name,
+                  email: data.email,
+                  number: data.phone,
+                  salary: data.salary,
+                  isActive: data.isActive,
+                  isOptimistic: data.isOptimistic,
+                }),
+              )
+            }
+            // 💡 تم حذف || !data.isActive ليبقى الزر شغالاً عندما يكون معطلاً
+            disabled={data.isOptimistic} 
+            className={`rounded-lg p-2 transition-colors ${
+              data.isActive
+                ? "theme-text-danger theme-hover-danger"      // لون أحمر/برتقالي عند الرغبة في التعطيل
+                : "text-emerald-500 hover:bg-emerald-500/10"   // لون أخضر أنيق عند الرغبة في التفعيل
+            }`}
+            aria-label={data.isActive ? "إلغاء تفعيل الحساب" : "تفعيل الحساب"}
+            title={data.isActive ? "إلغاء تفعيل الحساب" : "تفعيل الحساب"}
           >
+            {/* 💡 تغيير الأيقونة بشكل ديناميكي حسب حالة الحساب الحالية */}
             {data.isActive ? (
               <ToggleOffOutlined className="cursor-pointer" fontSize="small" />
             ) : (
@@ -71,11 +94,16 @@ const SecretaryCard = ({ data, index }) => {
           سكرتير
         </span>
         <span
-          className={`rounded-full px-3 py-1 text-xs font-bold ${data.isActive ? "theme-bg theme-text-muted" : "theme-danger-soft theme-text-danger"}`}
+          className={`rounded-full px-3 py-1 text-xs font-bold ${
+            data.isActive 
+              ? "theme-bg theme-text-muted" 
+              : "bg-red-500/10 text-red-500 border border-red-500/20"
+          }`}
         >
           {data.isActive ? "مفعّل" : "معطّل"}
         </span>
       </div>
+      
       <div className="mt-4 space-y-3">
         <InfoRow
           icon={<PhoneOutlined fontSize="small" />}

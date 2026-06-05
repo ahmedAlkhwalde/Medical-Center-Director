@@ -12,7 +12,7 @@ const DeleteClinicDialog = () => {
 
   const deleteClinicMutation = useDeleteClinicMutation({
     onSuccess: () => {
-      // 💡 ننقل إغلاق المودال إلى هنا بعد نجاح العملية تماماً لضمان استقرار حالة البيانات
+      // 🚀 نجاح كامل: نغلق النافذة هنا ونعرض الـ Snackbar المستقر
       dispatch(closeDeleteDialog());
       dispatch(
         showSnackbar({
@@ -22,9 +22,10 @@ const DeleteClinicDialog = () => {
       );
     },
     onError: () => {
+      // ❌ حدث خطأ: نترك المودال مفتوحاً ليعرف المستخدم سبب الفشل
       dispatch(
         showSnackbar({
-          message: "تعذر حذف العيادة حاليا",
+          message: "تعذر حذف العيادة حالياً، يرجى المحاولة مرة أخرى",
           variant: "error",
         }),
       );
@@ -45,18 +46,15 @@ const DeleteClinicDialog = () => {
       return;
     }
 
-   
     const uuid = itemToDelete?.uuid ?? itemToDelete?.id;
 
-    if (!uuid || String(uuid).startsWith('temp-')) {
+    if (!uuid || String(uuid).startsWith("temp-")) {
       dispatch(showSnackbar({ message: "معرف العيادة غير صالح", variant: "error" }));
       return;
     }
 
-    // 🚀 نرسل الـ uuid صراحة للـ Mutation
+    // تم إزالة السطر الذي يغلق الديالوج مبكراً لضمان بقاء الـ Spinner شغالاً حتى انتهاء الاستجابة
     deleteClinicMutation.mutate(uuid);
-    
-    dispatch(closeDeleteDialog());
   };
 
   return (
@@ -64,20 +62,23 @@ const DeleteClinicDialog = () => {
       {isDeleteDialogOpen && (
         <div
           className="fixed inset-0 flex items-center justify-center p-3 sm:p-4"
-          style={{ zIndex: 100 }}
+          style={{ zIndex: 10000 }}
         >
+          {/* الخلفية المظلمة */}
           <Motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => dispatch(closeDeleteDialog())}
+            onClick={() => !deleteClinicMutation.isPending && dispatch(closeDeleteDialog())}
             className="absolute inset-0 theme-overlay backdrop-blur-sm"
           />
 
+          {/* نافذة التأكيد */}
           <Motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
+            initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            transition={{ duration: 0.2 }}
             className="theme-surface relative z-10 w-full max-w-sm rounded-3xl p-5 text-center shadow-2xl sm:p-8"
           >
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full theme-danger-soft text-3xl theme-text-danger">
@@ -91,14 +92,41 @@ const DeleteClinicDialog = () => {
               <button
                 onClick={handleDelete}
                 disabled={deleteClinicMutation.isPending}
-                className="flex-1 rounded-xl theme-danger-soft py-3 font-bold theme-text-danger transition-all theme-hover-danger-solid"
+                className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl theme-danger-soft py-3 font-bold theme-text-danger transition-all theme-hover-danger-solid disabled:opacity-70"
               >
-                {deleteClinicMutation.isPending ? "جاري الحذف..." : "حذف"}
+                {deleteClinicMutation.isPending ? (
+                  <>
+                    <svg
+                  className="animate-spin h-5 w-5 theme-text-danger"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    document-dir="rtl"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+                    <span>جاري الحذف...</span>
+                  </>
+                ) : (
+                  "حذف"
+                )}
               </button>
               <button
                 onClick={() => dispatch(closeDeleteDialog())}
                 disabled={deleteClinicMutation.isPending}
-                className="flex-1 rounded-xl theme-bg py-3 font-bold theme-text"
+                className="flex-1 rounded-xl cursor-pointer theme-bg py-3 font-bold theme-text disabled:opacity-50"
               >
                 إلغاء
               </button>

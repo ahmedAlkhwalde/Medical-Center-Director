@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { motion as Motion, AnimatePresence } from "framer-motion";
 import { Close } from "@mui/icons-material";
 import { closeModal } from "../../../features/clinics/clinicsSlice";
 import { showSnackbar } from "../../../features/uiSlice";
@@ -18,16 +17,14 @@ const AddClinicModal = () => {
   const { isModalOpen, editingItem } = useSelector((state) => state.clinics);
   const dispatch = useDispatch();
 
+  if (!isModalOpen) return null;
+
   return (
-    <AnimatePresence>
-      {isModalOpen && (
-        <ModalContent
-          key={editingItem ? editingItem.id : "new"}
-          editingItem={editingItem}
-          onClose={() => dispatch(closeModal())}
-        />
-      )}
-    </AnimatePresence>
+    <ModalContent
+      key={editingItem ? editingItem.id : "new"}
+      editingItem={editingItem}
+      onClose={() => dispatch(closeModal())}
+    />
   );
 };
 
@@ -37,6 +34,8 @@ const ModalContent = ({ editingItem, onClose }) => {
   );
   const [errors, setErrors] = useState({});
   const dispatch = useDispatch();
+
+  // خطاف إضافة عيادة جديدة
   const createClinicMutation = useCreateClinicMutation({
     onSuccess: () => {
       dispatch(
@@ -45,17 +44,20 @@ const ModalContent = ({ editingItem, onClose }) => {
           variant: "success",
         }),
       );
-      dispatch(closeModal());
+      dispatch(closeModal()); // يغلق المودال فقط عند النجاح
     },
     onError: () => {
       dispatch(
         showSnackbar({
-          message: "تعذر إضافة العيادة حاليا",
+          message: "تعذر إضافة العيادة حالياً",
           variant: "error",
         }),
       );
+      // يبقى المودال مفتوحاً تلقائياً
     },
   });
+
+  // خطاف تعديل عيادة سابقة
   const updateClinicMutation = useUpdateClinicMutation({
     onSuccess: () => {
       dispatch(
@@ -64,17 +66,19 @@ const ModalContent = ({ editingItem, onClose }) => {
           variant: "success",
         }),
       );
-      dispatch(closeModal());
+      dispatch(closeModal()); // يغلق المودال فقط عند النجاح
     },
     onError: () => {
       dispatch(
         showSnackbar({
-          message: "تعذر تحديث العيادة حاليا",
+          message: "تعذر تحديث العيادة حالياً",
           variant: "error",
         }),
       );
+      // يبقى المودال مفتوحاً تلقائياً
     },
   });
+
   const isSubmitting =
     createClinicMutation.isPending || updateClinicMutation.isPending;
 
@@ -106,17 +110,7 @@ const ModalContent = ({ editingItem, onClose }) => {
     };
 
     if (editingItem) {
-      if (editingItem.isOptimistic) {
-        dispatch(
-          showSnackbar({
-            message: "انتظر اكتمال المزامنة قبل التعديل",
-            variant: "info",
-          }),
-        );
-        return;
-      }
-      const targetId =
-        editingItem.uuid;
+      const targetId = editingItem.uuid;
       if (!targetId) {
         dispatch(
           showSnackbar({
@@ -126,31 +120,25 @@ const ModalContent = ({ editingItem, onClose }) => {
         );
         return;
       }
-      dispatch(closeModal());
+      // يتم الإرسال المباشر دون إغلاق المودال مسبقاً
       updateClinicMutation.mutate({ uuid: targetId, payload });
       return;
     }
 
-    dispatch(closeModal());
+    // يتم الإرسال المباشر لإنشاء عيادة جديدة دون إغلاق المودال مسبقاً
     createClinicMutation.mutate(payload);
   };
 
   return (
-    <div className="fixed inset-0 z-100 flex items-center justify-center p-3 sm:p-4">
-      <Motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={onClose}
+    <div className="fixed inset-0 z-10000 flex items-center justify-center p-3 sm:p-4">
+      {/* الخلفية المظلمة الفورية */}
+      <div
+        onClick={() => !isSubmitting && onClose()}
         className="absolute inset-0 theme-overlay backdrop-blur-sm"
       />
 
-      <Motion.div
-        initial={{ scale: 0.9, opacity: 0, y: 20 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.9, opacity: 0, y: 20 }}
-        className="theme-surface relative z-10 w-full max-w-xl rounded-3xl p-5 shadow-2xl sm:p-8"
-      >
+      {/* نافذة المحتوى الفورية */}
+      <div className="theme-surface relative z-10 w-full max-w-xl rounded-3xl p-5 shadow-2xl sm:p-8">
         <div className="mb-6 flex items-start justify-between gap-3">
           <div className="text-right">
             <h3 className="text-2xl font-bold theme-text">
@@ -164,7 +152,8 @@ const ModalContent = ({ editingItem, onClose }) => {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl p-2 theme-hover-surface theme-text-muted transition-colors"
+            disabled={isSubmitting}
+            className="rounded-xl p-2 theme-hover-surface theme-text-muted transition-colors disabled:opacity-50"
             aria-label="إغلاق النافذة"
           >
             <Close fontSize="small" />
@@ -195,24 +184,54 @@ const ModalContent = ({ editingItem, onClose }) => {
           />
 
           <div className="flex flex-col gap-3 pt-2 sm:flex-row">
+            {/* زر الحفظ والتحديث مع الـ Spinner */}
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 cursor-pointer rounded-xl theme-accent px-5 py-3 font-bold theme-text-on-accent shadow-lg theme-shadow-accent"
+              className="flex-1 flex items-center justify-center gap-2 cursor-pointer rounded-xl theme-accent px-5 py-3 font-bold theme-text-on-accent shadow-lg theme-shadow-accent transition-all disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {editingItem ? "تحديث البيانات" : "حفظ العيادة"}
+              {isSubmitting ? (
+                <>
+                  <svg
+                    className="animate-spin h-5 w-5 text-current"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                  <span>جاري المعالجة...</span>
+                </>
+              ) : editingItem ? (
+                "تحديث البيانات"
+              ) : (
+                "حفظ العيادة"
+              )}
             </button>
+            
             <button
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="flex-1 cursor-pointer rounded-xl theme-bg px-5 py-3 font-bold theme-text"
+              className="flex-1 cursor-pointer rounded-xl theme-bg px-5 py-3 font-bold theme-text disabled:opacity-50 disabled:cursor-not-allowed"
             >
               إلغاء
             </button>
           </div>
         </form>
-      </Motion.div>
+      </div>
     </div>
   );
 };

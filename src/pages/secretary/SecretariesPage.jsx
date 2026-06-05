@@ -10,8 +10,10 @@ import {
 } from "@mui/icons-material";
 import SecretaryCard from "./components/SecretaryCard";
 import AddSecretaryModal from "./components/AddSecretaryModal";
+import DeleteConfirmDialog from "./components/DeleteConfirmDialog";
 import { formatSalary } from "./secretaryFormatters";
 import { openModal } from "../../features/secretaries/secretariesSlice";
+import { useSecretariesQuery } from "../../service/secretariesService";
 
 const normalizeSearchText = (value = "") =>
   value
@@ -23,8 +25,10 @@ const normalizeSearchText = (value = "") =>
 
 const SecretariesPage = () => {
   const dispatch = useDispatch();
-  const { items } = useSelector((state) => state.secretaries);
   const { searchQuery } = useSelector((state) => state.ui);
+  const { data, isLoading, isError } = useSecretariesQuery();
+  const items = useMemo(() => data?.items ?? [], [data?.items]);
+  const apiStats = useMemo(() => data?.stats ?? {}, [data?.stats]);
 
   const normalizedQuery = useMemo(
     () => normalizeSearchText(searchQuery),
@@ -52,18 +56,19 @@ const SecretariesPage = () => {
   }, [items, normalizedQuery]);
 
   const stats = useMemo(() => {
-    const totalSalary = items.reduce(
-      (sum, item) => sum + (Number(item.salary) || 0),
-      0,
-    );
-    const activeCount = items.filter((item) => item.isActive).length;
-    const inactiveCount = items.length - activeCount;
+    const totalSalary =
+      apiStats.total_salaries ??
+      items.reduce((sum, item) => sum + (Number(item.salary) || 0), 0);
+    const activeCount =
+      apiStats.active_count ?? items.filter((item) => item.isActive).length;
+    const inactiveCount = apiStats.inactive_count ?? items.length - activeCount;
+    const totalCount = apiStats.total_count ?? items.length;
 
     return [
       {
         id: 1,
         label: "إجمالي السكرتاريا",
-        value: items.length,
+        value: totalCount,
         note: "عدد السجلات المسجلة",
         icon: <PeopleOutline />,
       },
@@ -89,7 +94,9 @@ const SecretariesPage = () => {
         icon: <PaymentsOutlined />,
       },
     ];
-  }, [items]);
+  }, [apiStats, items]);
+
+  const isInitialLoading = isLoading && items.length === 0;
 
   return (
     <section className="w-full min-w-0 space-y-6">
@@ -149,13 +156,46 @@ const SecretariesPage = () => {
         ))}
       </Motion.div>
 
-      {normalizedQuery && (
+      {normalizedQuery && !isInitialLoading && !isError && (
         <div className="rounded-2xl border theme-border theme-surface px-4 py-3 text-sm font-medium theme-text-muted shadow-sm">
           يتم عرض {visibleItems.length} نتيجة مطابقة من أصل {items.length} سجل.
         </div>
       )}
 
-      {visibleItems.length > 0 ? (
+      {isInitialLoading ? (
+        <Motion.div
+          layout
+          className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 xl:gap-6"
+        >
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div
+              key={`secretary-skeleton-${index}`}
+              className="rounded-2xl border theme-border theme-surface p-4 shadow-sm sm:p-5 animate-pulse"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="space-y-2 text-right">
+                  <div className="h-3 w-24 rounded-full bg-slate-200/80 dark:bg-slate-700/60" />
+                  <div className="h-6 w-36 rounded-full bg-slate-200/70 dark:bg-slate-700/50" />
+                </div>
+                <div className="h-12 w-12 rounded-xl bg-slate-200/70 dark:bg-slate-700/50" />
+              </div>
+              <div className="mt-4 space-y-3">
+                <div className="h-10 rounded-xl bg-slate-200/60 dark:bg-slate-700/40" />
+                <div className="h-10 rounded-xl bg-slate-200/50 dark:bg-slate-700/30" />
+              </div>
+            </div>
+          ))}
+        </Motion.div>
+      ) : isError ? (
+        <div className="rounded-3xl border theme-border theme-surface p-6 text-center shadow-sm sm:p-8">
+          <p className="text-base font-bold theme-text-accent sm:text-lg">
+            حدث خطأ أثناء تحميل السكرتاريا
+          </p>
+          <p className="mt-2 text-sm theme-text-muted">
+            حاول مرة أخرى بعد قليل.
+          </p>
+        </div>
+      ) : visibleItems.length > 0 ? (
         <Motion.div
           layout
           className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 xl:gap-6"
@@ -178,6 +218,7 @@ const SecretariesPage = () => {
       )}
 
       <AddSecretaryModal />
+      <DeleteConfirmDialog />
     </section>
   );
 };
