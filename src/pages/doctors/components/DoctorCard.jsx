@@ -2,7 +2,6 @@ import { createElement } from "react";
 import { motion as Motion } from "framer-motion";
 import {
   EditOutlined,
-  PhoneOutlined,
   MailOutlined,
   EventOutlined,
   PersonOutline,
@@ -17,12 +16,14 @@ const DoctorCard = ({
   clinicNumber,
   onEdit,
   onViewDetails,
-  //   onToggleStatus,
+  onToggleStatus, 
 }) => {
   const rawProfitRate = Number(doctor.profitRate);
   const profitRate = Number.isFinite(rawProfitRate)
     ? Math.min(100, Math.max(0, rawProfitRate))
     : 0;
+
+  const isDoctorActive = Boolean(doctor.isActive || doctor.active);
 
   return (
     <Motion.div
@@ -32,7 +33,7 @@ const DoctorCard = ({
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ type: "spring", stiffness: 260, damping: 22 }}
       whileHover={{ y: -5 }}
-      onClick={() => onViewDetails?.(doctor.id)}
+      onClick={() => onViewDetails?.(doctor.id || doctor.uuid)}
       className="group relative cursor-pointer rounded-2xl border theme-border theme-surface p-4 shadow-md shadow-black/5 transition-all duration-700 ease-out hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-black/15 hover:theme-shadow-accent sm:p-5 md:p-6"
     >
       <div className="mb-5 flex items-start justify-between gap-3">
@@ -49,18 +50,18 @@ const DoctorCard = ({
         </div>
 
         <div className="flex gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
-          <button
+          {/* <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              onViewDetails?.(doctor.id);
+              onViewDetails?.(doctor.id || doctor.uuid);
             }}
             className="cursor-pointer rounded-lg p-2 theme-text-muted theme-hover-accent"
             aria-label="عرض التفاصيل"
             title="عرض الملف الشخصي"
           >
             <PersonOutline fontSize="small" />
-          </button>
+          </button> */}
           <button
             type="button"
             onClick={(e) => {
@@ -72,19 +73,27 @@ const DoctorCard = ({
           >
             <EditOutlined fontSize="small" />
           </button>
-          {/* <button
+          
+          <button
             type="button"
-            onClick={onToggleStatus}
-            className={`cursor-pointer rounded-lg p-2 transition-colors ${doctor.isActive ? "bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30" : "bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:hover:bg-green-900/30"}`}
-            aria-label={doctor.isActive ? "تعطيل الحساب" : "تفعيل الحساب"}
-            title={doctor.isActive ? "تعطيل الحساب" : "تفعيل الحساب"}
+            onClick={(e) => {
+              e.stopPropagation(); 
+              onToggleStatus?.(e);
+            }}
+            className={`cursor-pointer rounded-lg p-2 transition-colors ${
+              isDoctorActive 
+                ? "bg-amber-500/10 text-amber-600 hover:bg-amber-500/20" 
+                : "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20"
+            }`}
+            aria-label={isDoctorActive ? "تعطيل الحساب" : "تفعيل الحساب"}
+            title={isDoctorActive ? "تعطيل الحساب" : "تفعيل الحساب"}
           >
-            {doctor.isActive ? (
+            {isDoctorActive ? (
               <ToggleOffOutlined fontSize="small" />
             ) : (
               <ToggleOnOutlined fontSize="small" />
             )}
-          </button> */}
+          </button>
         </div>
       </div>
 
@@ -93,35 +102,21 @@ const DoctorCard = ({
           {specialtyName}
         </span>
         <span
-          className={`rounded-full px-3 py-1 text-xs font-bold ${doctor.isActive ? "theme-bg theme-text-muted" : "theme-danger-soft theme-text-danger"}`}
+          className={`rounded-full px-3 py-1 text-xs font-bold ${
+            isDoctorActive ? "theme-bg theme-text-muted" : "theme-danger-soft theme-text-danger"
+          }`}
         >
-          {doctor.isActive ? "الحساب مفعّل" : "الحساب معطّل"}
+          {isDoctorActive ? "الحساب مفعّل" : "الحساب معطّل"}
         </span>
       </div>
 
       <div className="space-y-3 text-sm">
-        {/* <InfoRow icon={PhoneOutlined} label="رقم الهاتف" value={doctor.phone} /> */}
-        <InfoRow
-          icon={MailOutlined}
-          label="البريد الإلكتروني"
-          value={doctor.email}
-          title={doctor.email}
-          valueClassName="text-left"
-        />
-        <InfoRow
-          icon={BusinessOutlined}
-          label="رقم العيادة"
-          value={clinicNumber || "غير محدد"}
-        />
-        <InfoRow
-          icon={EventOutlined}
-          label="تاريخ انتهاء العقد"
-          value={doctor.contractEndDate || "غير محدد"}
-          title={doctor.contractEndDate}
-        />
+        <InfoRow icon={MailOutlined} label="البريد الإلكتروني" value={doctor.email} title={doctor.email} valueClassName="text-left" />
+        <InfoRow icon={BusinessOutlined} label="رقم العيادة" value={clinicNumber || "غير محدد"} />
+        <InfoRow icon={EventOutlined} label="تاريخ انتهاء العقد" value={doctor.contractEndDate || "غير محدد"} title={doctor.contractEndDate} />
       </div>
 
-      <div className=" space-y-2 mt-3 rounded-xl theme-bg p-2">
+      <div className="space-y-2 mt-3 rounded-xl theme-bg p-2">
         <div className="flex items-center justify-between gap-3 text-sm">
           <span className="font-bold theme-text-muted">نسبة الربح</span>
           <span className="font-bold text-green-600 dark:text-green-400">
@@ -129,18 +124,8 @@ const DoctorCard = ({
           </span>
         </div>
 
-        <div
-          className="h-2 overflow-hidden rounded-full bg-green-100 dark:bg-green-900/30"
-          role="progressbar"
-          aria-valuenow={profitRate}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-label={`نسبة الربح ${profitRate}%`}
-        >
-          <div
-            className="h-full rounded-full bg-green-500 transition-all duration-500"
-            style={{ width: `${profitRate}%` }}
-          />
+        <div className="h-2 overflow-hidden rounded-full bg-green-100 dark:bg-green-900/30" role="progressbar" aria-valuenow={profitRate} aria-valuemin={0} aria-valuemax={100}>
+          <div className="h-full rounded-full bg-green-500 transition-all duration-500" style={{ width: `${profitRate}%` }} />
         </div>
       </div>
     </Motion.div>
@@ -153,11 +138,7 @@ const InfoRow = ({ icon, label, value, title, valueClassName = "" }) => (
       {createElement(icon, { fontSize: "small" })}
       <span className="truncate">{label}</span>
     </div>
-    <span
-      className={`min-w-0 flex-1 truncate font-medium theme-text ${valueClassName || "text-right"}`}
-      title={title || value}
-      dir={valueClassName ? "ltr" : undefined}
-    >
+    <span className={`min-w-0 flex-1 truncate font-medium theme-text ${valueClassName || "text-right"}`} title={title || value} dir={valueClassName ? "ltr" : undefined}>
       {value}
     </span>
   </div>

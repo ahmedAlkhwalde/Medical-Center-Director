@@ -5,20 +5,17 @@ import { motion as Motion, AnimatePresence } from "framer-motion";
 import {
   Add,
   FilterAlt,
-  PeopleOutline,
-  ToggleOffOutlined,
-  ToggleOnOutlined,
-  TrendingUpOutlined,
-  UploadFile,
+  GroupOutlined, // إجمالي الأطباء
+  VerifiedOutlined, // الحسابات المفعّلة
+  AccessTimeOutlined, // الأكثر انشغالاً (الوقت والمواعيد)
+  MonetizationOnOutlined, // الأعلى دخلاً
 } from "@mui/icons-material";
 import DoctorCard from "./components/DoctorCard";
 import AddDoctorModal from "./components/AddDoctorModal";
-import {
-  CLINIC_OPTIONS,
-  openModal,
-  toggleDoctorStatus,
-} from "../../features/doctors/doctorsSlice";
+import DoctorStatusConfirmDialog from "./components/DoctorStatusConfirmDialog";
+import { openModal, confirmDelete } from "../../features/doctors/doctorsSlice";
 import { useSpecialtiesQuery } from "../../service/specialtiesService";
+import { useDoctorsQuery } from "../../service/doctorsService";
 
 const normalizeSearchText = (value = "") =>
   value
@@ -32,38 +29,32 @@ const DoctorsPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
-  const { doctors } = useSelector((state) => state.doctors);
-  const { searchQuery } = useSelector((state) => state.ui);
+
   const [selectedSpecialtyId, setSelectedSpecialtyId] = useState("");
+  console.log(selectedSpecialtyId);
+  // 💡 تمرير المعرّف مباشرة للـ Hook ليقوم بالسيرفر-فلتر
+  const {
+    data: apiResponse,
+    isLoading,
+    isError,
+  } = useDoctorsQuery(selectedSpecialtyId);
   const { data: specialties = [] } = useSpecialtiesQuery();
 
-  const specialtyMap = useMemo(() => {
-    const map = new Map();
-    specialties.forEach((specialty) => {
-      if (specialty?.id != null) {
-        map.set(String(specialty.id), specialty.name);
-      }
-      if (specialty?.legacyId != null) {
-        map.set(String(specialty.legacyId), specialty.name);
-      }
-      if (specialty?.uuid != null) {
-        map.set(String(specialty.uuid), specialty.name);
-      }
-    });
-    return map;
-  }, [specialties]);
+  const doctors = apiResponse?.data || [];
+  const backendStats = apiResponse?.stats || {};
+
+  const { searchQuery } = useSelector((state) => state.ui);
 
   const normalizedSearchQuery = useMemo(
     () => normalizeSearchText(searchQuery),
     [searchQuery],
   );
 
+  // 💡 تم تبسيط التابع ليقوم فقط بفلترة البحث النصي المحلي، ففلترة الاختصاص أصبحت تأتي جاهزة من السيرفر
   const filteredDoctors = useMemo(() => {
     return doctors.filter((doctor) => {
-      const specialtyName = specialtyMap.get(String(doctor.specialtyId)) || "";
-      const clinicLabel =
-        CLINIC_OPTIONS.find((clinic) => clinic.id === doctor.clinicId)?.label ||
-        `عيادة رقم ${doctor.clinicId}`;
+      const specialtyName = doctor.specialization?.name || "";
+      const clinicLabel = doctor.clinic?.name || "";
 
       const searchableText = normalizeSearchText(
         [
@@ -72,70 +63,69 @@ const DoctorsPage = () => {
           doctor.email,
           specialtyName,
           clinicLabel,
-          doctor.clinicId,
-          doctor.contractEndDate,
-          doctor.joinedAt,
-          doctor.isActive ? "مفعّل" : "معطل",
+          doctor.details?.contract_expiry,
+          doctor.joined_at,
+          doctor.status?.is_active ? "مفعّل" : "معطل",
         ].join(" "),
       );
 
       const matchesSearch =
         !normalizedSearchQuery ||
         searchableText.includes(normalizedSearchQuery);
-      const matchesSpecialty =
-        !selectedSpecialtyId ||
-        String(doctor.specialtyId) === String(selectedSpecialtyId);
 
-      return matchesSearch && matchesSpecialty;
+      return matchesSearch;
     });
-  }, [doctors, normalizedSearchQuery, selectedSpecialtyId, specialtyMap]);
+  }, [doctors, normalizedSearchQuery]); // 💡 تم حذف selectedSpecialtyId من هنا لأن السيرفر يتكفل بالباقي
 
   const stats = useMemo(() => {
-    const activeDoctors = doctors.filter((doctor) => doctor.isActive).length;
-    const inactiveDoctors = doctors.length - activeDoctors;
-    const averageProfitRate = doctors.length
-      ? Math.round(
-          doctors.reduce(
-            (sum, doctor) => sum + (Number(doctor.profitRate) || 0),
-            0,
-          ) / doctors.length,
-        )
-      : 0;
-
     return [
       {
         id: 1,
         label: "إجمالي الأطباء",
-        value: doctors.length,
-        note: "جميع السجلات المسجلة",
-        icon: <PeopleOutline />,
+        value: backendStats.total_doctors ?? 0,
+        note: `عدد السجلات المسجلة`,
+        icon: <GroupOutlined />,
       },
       {
         id: 2,
         label: "المفعّلون",
-        value: activeDoctors,
+        value: backendStats.active_doctors_count ?? 0,
         note: "الأطباء النشطون حاليًا",
-        icon: <ToggleOnOutlined />,
+        icon: <VerifiedOutlined />,
       },
       {
         id: 3,
-        label: "المعطّلون",
-        value: inactiveDoctors,
-        note: "الأطباء غير النشطين",
-        icon: <ToggleOffOutlined />,
+        label: "الأكثر انشغالاً",
+        value: backendStats.most_busy_doctor || "لا يوجد",
+        note: "حسب المواعيد والضغط",
+        icon: <AccessTimeOutlined />,
       },
       {
         id: 4,
-        label: "متوسط الربح",
-        value: `${averageProfitRate}%`,
-        note: "متوسط نسبة الربح المسجلة",
-        icon: <TrendingUpOutlined />,
+        label: "الأعلى دخلاً",
+        value: backendStats.top_earner_doctor || "N/A",
+        note: `متوسط المواعيد: ${backendStats.avg_appointments_doctor ?? 0}`,
+        icon: <MonetizationOnOutlined />,
       },
     ];
-  }, [doctors]);
+  }, [backendStats]);
+
+  if (isError) {
+    return (
+      <div className="rounded-3xl border border-red-500/30 bg-red-500/10 p-6 text-center shadow-sm">
+        <p className="text-lg font-bold text-red-500">
+          حدث خطأ أثناء جلب البيانات من السيرفر
+        </p>
+        <p className="mt-2 text-sm theme-text-muted">
+          يرجى التحقق من اتصال السيرفر والمحاولة لاحقاً.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <section className="w-full min-w-0 space-y-6">
+      {/* الهيدر وفلاتر البحث */}
       <div className="overflow-hidden rounded-3xl border theme-border theme-surface-90 theme-gradient-panel p-4 shadow-sm sm:p-5 md:p-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="space-y-1 text-right">
@@ -156,32 +146,21 @@ const DoctorsPage = () => {
               <select
                 value={selectedSpecialtyId}
                 onChange={(event) => setSelectedSpecialtyId(event.target.value)}
-                className="w-full cursor-pointer appearance-none rounded-xl border theme-border theme-surface py-3 pr-12  text-sm font-bold theme-text shadow-sm outline-none transition-all focus:ring-2 focus:ring-(--color-accent)"
+                className="w-full cursor-pointer appearance-none rounded-xl border theme-border theme-surface py-3 pr-12 text-sm font-bold theme-text shadow-sm outline-none transition-all focus:ring-2 focus:ring-(--color-accent)"
               >
                 <option value="">كل الاختصاصات</option>
                 {specialties.map((specialty) => {
-                  const optionValue =
-                    specialty.legacyId ?? specialty.id ?? specialty.uuid;
+                  // 💡 تأمين جلب الـ ID الرقمي للاختصاص (سواء كان الحقل اسمه id أو specialization_id)
+                  const optionId = specialty.legacyId;
+
                   return (
-                    <option key={optionValue} value={optionValue}>
-                      {specialty.name}
+                    <option key={optionId} value={optionId}>
+                      {specialty.name} {/* 👁️ المستخدم يرى الاسم هنا */}
                     </option>
                   );
                 })}
               </select>
             </div>
-
-            <Motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ duration: 0.3 }}
-              onClick={() => fileInputRef.current?.click()}
-              type="button"
-              className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border theme-border theme-surface px-5 py-3 text-sm font-bold theme-text shadow-sm transition-all sm:w-auto sm:px-6"
-            >
-              <UploadFile fontSize="small" />
-              رفع ملف Excel
-            </Motion.button>
 
             <Motion.button
               whileHover={{ scale: 1.02 }}
@@ -198,34 +177,46 @@ const DoctorsPage = () => {
         </div>
       </div>
 
+      {/* لوحة الإحصائيات */}
       <Motion.div
         layout
         className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
       >
-        {stats.map((stat, index) => (
-          <Motion.div
-            key={stat.id}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.05 }}
-            className="rounded-2xl border theme-border theme-surface p-4 shadow-sm sm:p-5"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div className="space-y-1 text-right">
-                <p className="text-xs font-bold uppercase tracking-wide theme-text-muted">
-                  {stat.label}
-                </p>
-                <h3 className="text-2xl font-bold theme-text-accent">
-                  {stat.value}
-                </h3>
-                <p className="text-sm theme-text-muted">{stat.note}</p>
+        {isLoading
+          ? Array.from({ length: 4 }).map((_, idx) => (
+              <div
+                key={idx}
+                className="rounded-2xl border theme-border theme-surface p-4 shadow-sm sm:p-5 animate-pulse space-y-3"
+              >
+                <div className="h-3 w-1/3 rounded bg-zinc-200 dark:bg-zinc-700" />
+                <div className="h-6 w-1/2 rounded bg-zinc-200 dark:bg-zinc-700" />
+                <div className="h-3 w-3/4 rounded bg-zinc-200 dark:bg-zinc-700" />
               </div>
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl theme-accent-soft theme-text-accent">
-                {stat.icon}
-              </div>
-            </div>
-          </Motion.div>
-        ))}
+            ))
+          : stats.map((stat, index) => (
+              <Motion.div
+                key={stat.id}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+                className="rounded-2xl border theme-border theme-surface p-4 shadow-sm sm:p-5"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-1 text-right">
+                    <p className="text-xs font-bold uppercase tracking-wide theme-text-muted">
+                      {stat.label}
+                    </p>
+                    <h3 className="text-2xl font-bold theme-text-accent">
+                      {stat.value}
+                    </h3>
+                    <p className="text-sm theme-text-muted">{stat.note}</p>
+                  </div>
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl theme-accent-soft theme-text-accent">
+                    {stat.icon}
+                  </div>
+                </div>
+              </Motion.div>
+            ))}
       </Motion.div>
 
       <input
@@ -235,33 +226,65 @@ const DoctorsPage = () => {
         className="hidden"
       />
 
-      {filteredDoctors.length > 0 ? (
+      {/* عرض الكروت */}
+      {isLoading ? (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 xl:gap-6">
+          {Array.from({ length: 6 }).map((_, idx) => (
+            <div
+              key={idx}
+              className="rounded-2xl border theme-border theme-surface p-5 shadow-md animate-pulse space-y-4"
+            >
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 rounded-xl bg-zinc-200 dark:bg-zinc-700" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-1/2 rounded bg-zinc-200 dark:bg-zinc-700" />
+                  <div className="h-3 w-1/3 rounded bg-zinc-200 dark:bg-zinc-700" />
+                </div>
+              </div>
+              <div className="h-6 w-1/4 rounded-full bg-zinc-200 dark:bg-zinc-700" />
+              <div className="space-y-2 pt-2">
+                <div className="h-8 rounded-xl bg-zinc-200 dark:bg-zinc-700" />
+                <div className="h-8 rounded-xl bg-zinc-200 dark:bg-zinc-700" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : filteredDoctors.length > 0 ? (
         <Motion.div
           layout
           className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 xl:gap-6"
         >
           <AnimatePresence mode="popLayout">
-            {filteredDoctors.map((doctor) => (
-              <DoctorCard
-                key={doctor.id}
-                doctor={doctor}
-                specialtyName={
-                  specialtyMap.get(doctor.specialtyId) || "غير محدد"
-                }
-                clinicNumber={doctor.clinicId}
-                onEdit={() => dispatch(openModal(doctor))}
-                onViewDetails={(doctorId) =>
-                  navigate(`/main-page/doctors/${doctorId}`)
-                }
-                onToggleStatus={() => dispatch(toggleDoctorStatus(doctor.id))}
-              />
-            ))}
+            {filteredDoctors.map((doctor) => {
+              const mappedDoctor = {
+                ...doctor,
+                id: doctor.uuid,
+                email: doctor.email,
+                isActive: doctor.status?.is_active,
+                profitRate: parseInt(doctor.details?.ratio || 0),
+                contractEndDate: doctor.details?.contract_expiry,
+              };
+
+              return (
+                <DoctorCard
+                  key={doctor.uuid}
+                  doctor={mappedDoctor}
+                  specialtyName={doctor.specialization?.name || "غير محدد"}
+                  clinicNumber={doctor.clinic?.name || "غير محدد"}
+                  onEdit={() => dispatch(openModal(doctor))}
+                  onViewDetails={(doctorUuid) =>
+                    navigate(`/main-page/doctors/${doctorUuid}`)
+                  }
+                  onToggleStatus={() => dispatch(confirmDelete(mappedDoctor))}
+                />
+              );
+            })}
           </AnimatePresence>
         </Motion.div>
       ) : (
         <div className="rounded-3xl border theme-border theme-surface p-6 text-center shadow-sm sm:p-8">
           <p className="text-base font-bold theme-text-accent sm:text-lg">
-            لا توجد أطباء مطابقون للبحث أو الفلترة الحالية
+            لا يوجد أطباء مطابقون للبحث أو الفلترة الحالية
           </p>
           <p className="mt-2 text-sm theme-text-muted">
             جرّب تغيير الاسم في البحث أو بدّل الاختصاص.
@@ -269,7 +292,9 @@ const DoctorsPage = () => {
         </div>
       )}
 
+      {/* نوافذ النظام المنبثقة */}
       <AddDoctorModal />
+      <DoctorStatusConfirmDialog />
     </section>
   );
 };

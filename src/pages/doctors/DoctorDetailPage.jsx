@@ -18,7 +18,7 @@ import {
   Favorite,
   LocalFireDepartment,
 } from "@mui/icons-material";
-import { toggleDoctorStatus } from "../../features/doctors/doctorsSlice";
+// import { toggleDoctorStatus } from "../../features/doctors/doctorsSlice";
 import { useSpecialtiesQuery } from "../../service/specialtiesService";
 
 const formatNumber = (value) => new Intl.NumberFormat("ar-SA").format(value);
@@ -345,7 +345,6 @@ const MiniBarList = ({ items }) => (
 const DoctorDetailPage = () => {
   const { doctorId } = useParams();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const [period, setPeriod] = useState("month");
   const [filterMode, setFilterMode] = useState("none"); // none | day | month | year
   const [filterValue, setFilterValue] = useState("");
@@ -593,7 +592,7 @@ const DoctorDetailPage = () => {
                   {doctor.isActive ? "مفعّل" : "معطل"}
                 </span>
                 <button
-                  onClick={() => dispatch(toggleDoctorStatus(doctor.id))}
+                  // onClick={() => dispatch(toggleDoctorStatus(doctor.id))}
                   className="inline-flex items-center gap-2 rounded-lg border theme-border theme-surface px-3 py-1 text-[11px] font-semibold transition-colors hover:bg-theme-surface"
                 >
                   {doctor.isActive ? "تعطيل" : "تفعيل"}

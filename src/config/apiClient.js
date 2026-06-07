@@ -21,7 +21,7 @@ const readStoredToken = () => {
 const apiClient = axios.create({
   baseURL: 'http://192.168.1.4:8000/api', 
   
-  timeout: 10000, 
+  timeout: 60000, 
   
   headers: {
     // 'Content-Type': 'application/json',

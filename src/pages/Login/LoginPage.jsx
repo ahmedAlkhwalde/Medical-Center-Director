@@ -19,14 +19,12 @@ const LoginPage = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
   const loginMutation = useLoginMutation();
 
   // نراقب الـ token والـ rememberMe من الـ Redux
   const { rememberMe, token, lastUsedEmail } = useSelector(
     (state) => state.auth,
   );
-  const passwordResetSuccess = location.state?.passwordResetSuccess;
 
   // --- أفضل مكان للانتقال ---
   // نراقب الـ token؛ بمجرد وجوده، يتم الانتقال تلقائياً
