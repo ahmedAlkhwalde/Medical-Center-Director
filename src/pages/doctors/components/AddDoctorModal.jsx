@@ -5,10 +5,9 @@
 // import { CircularProgress } from "@mui/material"; // الـ Spinner الخاص بزر الحفظ
 // import { closeModal } from "../../../features/doctors/doctorsSlice";
 // import { useSpecialtiesQuery } from "../../../service/specialtiesService";
-// import { useClinicsQuery } from "../../../service/clinicsService"; 
+// import { useClinicsQuery } from "../../../service/clinicsService";
 // import { useCreateDoctorMutation, useUpdateDoctorMutation } from "../../../service/doctorsService";
 // import { showSnackbar } from "../../../features/uiSlice";
-
 
 // const getTodayISODate = () => {
 //   const now = new Date();
@@ -31,10 +30,10 @@
 // const AddDoctorModal = () => {
 //   const { isModalOpen, editingDoctor } = useSelector((state) => state.doctors);
 //   const dispatch = useDispatch();
-  
+
 //   const { data: specialtiesData, isLoading: isLoadingSpecialties } = useSpecialtiesQuery();
 //   const { data: clinicsQueryResult, isLoading: isLoadingClinics } = useClinicsQuery();
-  
+
 //   const createDoctorMutation = useCreateDoctorMutation();
 //   const updateDoctorMutation = useUpdateDoctorMutation();
 
@@ -137,7 +136,7 @@
 //     // 3. مقارنة كل حقل وإضافته فقط إذا تغير
 //     Object.keys(currentValues).forEach((key) => {
 //       // استخراج القيمة الأصلية بدقة
-//       const originalValue = 
+//       const originalValue =
 //         key === 'clinic_id' ? (editingDoctor.clinic?.legacyId ?? editingDoctor.clinic?.id ?? editingDoctor.clinic_id) :
 //         key === 'specialization_id' ? (editingDoctor.specialization?.legacyId ?? editingDoctor.specialization?.id ?? editingDoctor.specialization_id) :
 //         key === 'number' ? (editingDoctor.phone) :
@@ -173,8 +172,8 @@
 //       number: formData.phone.trim(),
 //       email: formData.email.trim(),
 //       clinic_id: Number(formData.clinic_id),
-//       specialization_id: Number(formData.specialization_id), 
-//       endcontract: formData.endcontract, 
+//       specialization_id: Number(formData.specialization_id),
+//       endcontract: formData.endcontract,
 //       ratio: Number(formData.ratio),
 //     };
 
@@ -189,7 +188,6 @@
 //     });
 //   }
 // };
-
 
 //   return (
 //     <div className="fixed inset-0 z-10000 flex items-center justify-center p-3 sm:p-4">
@@ -381,13 +379,15 @@ import { useState, useMemo, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { motion as Motion, AnimatePresence } from "framer-motion";
 import { Close } from "@mui/icons-material";
-import { CircularProgress } from "@mui/material"; // الـ Spinner الخاص بزر الحفظ
+import { CircularProgress } from "@mui/material";
 import { closeModal } from "../../../features/doctors/doctorsSlice";
 import { useSpecialtiesQuery } from "../../../service/specialtiesService";
-import { useClinicsQuery } from "../../../service/clinicsService"; 
-import { useCreateDoctorMutation, useUpdateDoctorMutation } from "../../../service/doctorsService";
+import { useClinicsQuery } from "../../../service/clinicsService";
+import {
+  useCreateDoctorMutation,
+  useUpdateDoctorMutation,
+} from "../../../service/doctorsService";
 import { showSnackbar } from "../../../features/uiSlice";
-
 
 const getTodayISODate = () => {
   const now = new Date();
@@ -397,30 +397,48 @@ const getTodayISODate = () => {
 
 const isPastDate = (value) => value < getTodayISODate();
 
-const createInitialFormData = (editingDoctor) => {
-  // استخراج معرف العيادة مع دعم كافة صيغ التسمية المحتملة
-  const clinicId = editingDoctor?.clinic?.legacyId ?? 
-                   editingDoctor?.clinic?.id ?? 
-                   editingDoctor?.clinic_id ?? 
-                   editingDoctor?.clinicId ?? 
-                   editingDoctor?.clinic?.Clinic_uuid ?? 
-                   editingDoctor?.clinic?.uuid ?? "";
+// دالة مساعدة لاستخراج أي معرّف من كائن (عيادة / اختصاص)
+const extractIdFromObject = (obj) => {
+  if (!obj) return undefined;
+  return obj?.legacyId ?? obj?.id ?? obj?.uuid ?? obj?.Clinic_uuid ?? obj?.Specialization_uuid;
+};
 
-  // استخراج معرف الاختصاص مع دعم كافة صيغ التسمية المحتملة
-  const specializationId = editingDoctor?.specialization?.legacyId ?? 
-                           editingDoctor?.specialization?.id ?? 
-                           editingDoctor?.specialization_id ?? 
-                           editingDoctor?.specializationId ?? 
-                           editingDoctor?.specialtyId ?? 
-                           editingDoctor?.specialty?.id ??
-                           editingDoctor?.specialization?.uuid ?? "";
+// دالة لاستخراج معرف الطبيب الأصلي للعيادة أو الاختصاص
+const getDoctorEntityId = (doctor, entityType) => {
+  if (!doctor) return undefined;
+  if (entityType === "clinic") {
+    return (
+      extractIdFromObject(doctor.clinic) ?? doctor.clinic_id ?? doctor.clinicId
+    );
+  }
+  if (entityType === "specialization") {
+    return (
+      extractIdFromObject(doctor.specialization) ??
+      doctor.specialization_id ??
+      doctor.specializationId ??
+      doctor.specialtyId ??
+      extractIdFromObject(doctor.specialty)
+    );
+  }
+  return undefined;
+};
+
+const createInitialFormData = (editingDoctor) => {
+  const clinicId = getDoctorEntityId(editingDoctor, "clinic") ?? "";
+  const specializationId =
+    getDoctorEntityId(editingDoctor, "specialization") ?? "";
 
   return {
     name: editingDoctor?.name || "",
     phone: editingDoctor?.phone || editingDoctor?.number || "",
     email: editingDoctor?.email || "",
-    endcontract: editingDoctor?.details?.contract_expiry || editingDoctor?.endcontract || "",
-    ratio: editingDoctor?.details?.ratio ? parseFloat(editingDoctor.details.ratio) : editingDoctor?.ratio ?? "",
+    endcontract:
+      editingDoctor?.details?.contract_expiry ||
+      editingDoctor?.endcontract ||
+      "",
+    ratio: editingDoctor?.details?.ratio
+      ? parseFloat(editingDoctor.details.ratio)
+      : (editingDoctor?.ratio ?? ""),
     clinic_id: clinicId !== "" ? String(clinicId) : "",
     specialization_id: specializationId !== "" ? String(specializationId) : "",
   };
@@ -429,10 +447,12 @@ const createInitialFormData = (editingDoctor) => {
 const AddDoctorModal = () => {
   const { isModalOpen, editingDoctor } = useSelector((state) => state.doctors);
   const dispatch = useDispatch();
-  
-  const { data: specialtiesData, isLoading: isLoadingSpecialties } = useSpecialtiesQuery();
-  const { data: clinicsQueryResult, isLoading: isLoadingClinics } = useClinicsQuery();
-  
+
+  const { data: specialtiesData, isLoading: isLoadingSpecialties } =
+    useSpecialtiesQuery();
+  const { data: clinicsQueryResult, isLoading: isLoadingClinics } =
+    useClinicsQuery();
+
   const createDoctorMutation = useCreateDoctorMutation();
   const updateDoctorMutation = useUpdateDoctorMutation();
 
@@ -464,34 +484,104 @@ const AddDoctorModal = () => {
   );
 };
 
-const ModalContent = ({ editingDoctor, specialties = [], clinics = [], createDoctorMutation, updateDoctorMutation, isLoadingData, onClose }) => {
-  const [formData, setFormData] = useState(() => createInitialFormData(editingDoctor));
+const ModalContent = ({
+  editingDoctor,
+  specialties = [],
+  clinics = [],
+  createDoctorMutation,
+  updateDoctorMutation,
+  isLoadingData,
+  onClose,
+}) => {
+  const [formData, setFormData] = useState(() =>
+    createInitialFormData(editingDoctor),
+  );
   const [errors, setErrors] = useState({});
   const dispatch = useDispatch();
 
-  // خطوة الأمان: تحديث وإجبار القوائم المنسدلة على اختيار القيم الصحيحة فور تحميل البيانات بشكل كامل
+  // تصحيح القيم الافتراضية للعيادة والاختصاص بعد تحميل القوائم
+  // useEffect(() => {
+  //   if (editingDoctor && clinics.length > 0 && specialties.length > 0) {
+  //     // 1. معالجة العيادة
+  //     const doctorClinicId = getDoctorEntityId(editingDoctor, 'clinic');
+  //     if (doctorClinicId) {
+  //       const matchedClinic = clinics.find(clinic => {
+  //         const clinicId = extractIdFromObject(clinic);
+  //         return clinicId && String(clinicId) === String(doctorClinicId);
+  //       });
+  //       if (matchedClinic) {
+  //         const optionValue = extractIdFromObject(matchedClinic);
+  //         if (optionValue) {
+  //           setFormData(prev => ({ ...prev, clinic_id: String(optionValue) }));
+  //         }
+  //       }
+  //     }
+
+  //     // 2. معالجة الاختصاص
+  //     const doctorSpecId = getDoctorEntityId(editingDoctor, 'specialization');
+  //     if (doctorSpecId) {
+  //       const matchedSpecialty = specialties.find(spec => {
+  //         const specId = extractIdFromObject(spec);
+  //         return specId && String(specId) === String(doctorSpecId);
+  //       });
+  //       if (matchedSpecialty) {
+  //         const optionValue = extractIdFromObject(matchedSpecialty);
+  //         if (optionValue) {
+  //           setFormData(prev => ({ ...prev, specialization_id: String(optionValue) }));
+  //         }
+  //       }
+  //     }
+  //   }
+  // }, [clinics, specialties, editingDoctor]);
+
+  // تصحيح القيم الافتراضية للعيادة والاختصاص بعد تحميل القوائم
   useEffect(() => {
     if (editingDoctor && clinics.length > 0 && specialties.length > 0) {
-      const currentClinicId = editingDoctor?.clinic?.legacyId ?? 
-                              editingDoctor?.clinic?.id ?? 
-                              editingDoctor?.clinic_id ?? 
-                              editingDoctor?.clinicId ?? 
-                              editingDoctor?.clinic?.Clinic_uuid ?? 
-                              editingDoctor?.clinic?.uuid;
+      // --- معالجة العيادة ---
+      const doctorClinicId = getDoctorEntityId(editingDoctor, "clinic");
+      if (doctorClinicId) {
+        const matchedClinic = clinics.find((clinic) => {
+          const idsToCheck = [
+            clinic.legacyId,
+            clinic.id,
+            clinic.uuid,
+            clinic.Clinic_uuid,
+          ].filter((val) => val != null);
+          return idsToCheck.some((id) => String(id) === String(doctorClinicId));
+        });
+        if (matchedClinic) {
+          const optionValue = extractIdFromObject(matchedClinic);
+          if (optionValue) {
+            setFormData((prev) => ({
+              ...prev,
+              clinic_id: String(optionValue),
+            }));
+          }
+        }
+      }
 
-      const currentSpecializationId = editingDoctor?.specialization?.legacyId ?? 
-                                      editingDoctor?.specialization?.id ?? 
-                                      editingDoctor?.specialization_id ?? 
-                                      editingDoctor?.specializationId ?? 
-                                      editingDoctor?.specialtyId ?? 
-                                      editingDoctor?.specialty?.id ??
-                                      editingDoctor?.specialization?.uuid;
-
-      setFormData((prev) => ({
-        ...prev,
-        clinic_id: currentClinicId ? String(currentClinicId) : prev.clinic_id,
-        specialization_id: currentSpecializationId ? String(currentSpecializationId) : prev.specialization_id,
-      }));
+      // --- معالجة الاختصاص ---
+      const doctorSpecId = getDoctorEntityId(editingDoctor, "specialization");
+      if (doctorSpecId) {
+        const matchedSpecialty = specialties.find((spec) => {
+          const idsToCheck = [
+            spec.legacyId,
+            spec.id,
+            spec.uuid,
+            spec.Specialization_uuid,
+          ].filter((val) => val != null);
+          return idsToCheck.some((id) => String(id) === String(doctorSpecId));
+        });
+        if (matchedSpecialty) {
+          const optionValue = extractIdFromObject(matchedSpecialty);
+          if (optionValue) {
+            setFormData((prev) => ({
+              ...prev,
+              specialization_id: String(optionValue),
+            }));
+          }
+        }
+      }
     }
   }, [clinics, specialties, editingDoctor]);
 
@@ -541,10 +631,14 @@ const ModalContent = ({ editingDoctor, specialties = [], clinics = [], createDoc
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (!validate() || createDoctorMutation.isPending || updateDoctorMutation.isPending) return;
+    if (
+      !validate() ||
+      createDoctorMutation.isPending ||
+      updateDoctorMutation.isPending
+    )
+      return;
 
     if (editingDoctor) {
-      // 1. تعريف القيم الحالية من الـ formData
       const currentValues = {
         name: formData.name.trim(),
         number: formData.phone.trim(),
@@ -555,67 +649,94 @@ const ModalContent = ({ editingDoctor, specialties = [], clinics = [], createDoc
         ratio: Number(formData.ratio),
       };
 
-      // 2. إنشاء كائن التحديث الفارغ
       const updatePayload = {};
 
-      // 3. مقارنة كل حقل وإضافته فقط إذا تغير
       Object.keys(currentValues).forEach((key) => {
-        // استخراج القيمة الأصلية بدقة متناهية متطابقة مع التعديل الجديد لمنع ضرب المقارنة
-        const originalValue = 
-          key === 'clinic_id' ? (editingDoctor.clinic?.legacyId ?? editingDoctor.clinic?.id ?? editingDoctor.clinic_id ?? editingDoctor.clinicId ?? editingDoctor.clinic?.Clinic_uuid ?? editingDoctor.clinic?.uuid) :
-          key === 'specialization_id' ? (editingDoctor.specialization?.legacyId ?? editingDoctor.specialization?.id ?? editingDoctor.specialization_id ?? editingDoctor.specializationId ?? editingDoctor.specialtyId ?? editingDoctor.specialty?.id ?? editingDoctor.specialization?.uuid) :
-          key === 'number' ? (editingDoctor.phone || editingDoctor.number) :
-          editingDoctor[key] ?? editingDoctor.details?.[key];
+        const originalValue =
+          key === "clinic_id"
+            ? (editingDoctor.clinic?.legacyId ??
+              editingDoctor.clinic?.id ??
+              editingDoctor.clinic_id ??
+              editingDoctor.clinicId ??
+              editingDoctor.clinic?.Clinic_uuid ??
+              editingDoctor.clinic?.uuid)
+            : key === "specialization_id"
+              ? (editingDoctor.specialization?.legacyId ??
+                editingDoctor.specialization?.id ??
+                editingDoctor.specialization_id ??
+                editingDoctor.specializationId ??
+                editingDoctor.specialtyId ??
+                editingDoctor.specialty?.id ??
+                editingDoctor.specialization?.uuid)
+              : key === "number"
+                ? editingDoctor.phone || editingDoctor.number
+                : (editingDoctor[key] ?? editingDoctor.details?.[key]);
 
-        // مقارنة القيم (تحويلها لنصوص لضمان دقة المقارنة الصافية)
         if (String(currentValues[key]) !== String(originalValue ?? "")) {
           updatePayload[key] = currentValues[key];
         }
       });
 
-      // 4. إرسال الطلب فقط إذا كان هناك تغييرات
       if (Object.keys(updatePayload).length > 0) {
-        updateDoctorMutation.mutate({ uuid: editingDoctor.uuid, payload: updatePayload }, {
-          onSuccess: () => {
-            console.log(updatePayload)
-            dispatch(showSnackbar({ message: "تم تحديث البيانات بنجاح!", variant: "success" }));
-            setTimeout(() => dispatch(closeModal()), 100);
+        updateDoctorMutation.mutate(
+          { uuid: editingDoctor.uuid, payload: updatePayload },
+          {
+            onSuccess: () => {
+              dispatch(
+                showSnackbar({
+                  message: "تم تحديث البيانات بنجاح!",
+                  variant: "success",
+                }),
+              );
+              setTimeout(() => dispatch(closeModal()), 100);
+            },
+            onError: () => {
+              dispatch(
+                showSnackbar({
+                  message: "حدث خطأ أثناء التحديث.",
+                  variant: "error",
+                }),
+              );
+            },
           },
-          onError: () => {
-            console.log(updatePayload)
-            dispatch(showSnackbar({ message: "حدث خطأ أثناء التحديث.", variant: "error" }));
-          }
-        });
+        );
       } else {
-        dispatch(showSnackbar({ message: "لم يتم تغيير أي بيانات.", variant: "info" }));
+        dispatch(
+          showSnackbar({ message: "لم يتم تغيير أي بيانات.", variant: "info" }),
+        );
       }
-
     } else {
-      // منطق الإضافة التقليدي
       const payload = {
         name: formData.name.trim(),
         number: formData.phone.trim(),
         email: formData.email.trim(),
         clinic_id: Number(formData.clinic_id),
-        specialization_id: Number(formData.specialization_id), 
-        endcontract: formData.endcontract, 
+        specialization_id: Number(formData.specialization_id),
+        endcontract: formData.endcontract,
         ratio: Number(formData.ratio),
       };
-      console.log(payload)
 
       createDoctorMutation.mutate(payload, {
         onSuccess: () => {
-          dispatch(showSnackbar({ message: "تم إضافة الطبيب بنجاح!", variant: "success" }));
+          dispatch(
+            showSnackbar({
+              message: "تم إضافة الطبيب بنجاح!",
+              variant: "success",
+            }),
+          );
           setTimeout(() => dispatch(closeModal()), 100);
         },
         onError: (error) => {
-          dispatch(showSnackbar({ message: "تعذر إضافة الطبيب.", variant: "error" }));
-          console.error(error)
-        }
+          dispatch(
+            showSnackbar({ message: "تعذر إضافة الطبيب.", variant: "error" }),
+          );
+          console.error(error);
+        },
       });
     }
   };
 
+  console.log("Full editingDoctor:", editingDoctor);
 
   return (
     <div className="fixed inset-0 z-10000 flex items-center justify-center p-3 sm:p-4">
@@ -639,7 +760,8 @@ const ModalContent = ({ editingDoctor, specialties = [], clinics = [], createDoc
               {editingDoctor ? "تعديل بيانات الطبيب" : "إضافة طبيب جديد"}
             </h3>
             <p className="mt-1 text-sm theme-text-muted">
-              أدخل البيانات وسيتم ربط المعرفات الخاصة بالعيادة والاختصاص تلقائياً.
+              أدخل البيانات وسيتم ربط المعرفات الخاصة بالعيادة والاختصاص
+              تلقائياً.
             </p>
           </div>
 
@@ -658,9 +780,15 @@ const ModalContent = ({ editingDoctor, specialties = [], clinics = [], createDoc
             label="اسم الطبيب"
             value={formData.name}
             error={errors.name}
-            disabled={createDoctorMutation.isPending || updateDoctorMutation.isPending || isLoadingData}
+            disabled={
+              createDoctorMutation.isPending ||
+              updateDoctorMutation.isPending ||
+              isLoadingData
+            }
             placeholder="مثال: د. أحمد علي"
-            onChange={(event) => setFormData({ ...formData, name: event.target.value })}
+            onChange={(event) =>
+              setFormData({ ...formData, name: event.target.value })
+            }
           />
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -668,9 +796,15 @@ const ModalContent = ({ editingDoctor, specialties = [], clinics = [], createDoc
               label="رقم الهاتف"
               value={formData.phone}
               error={errors.phone}
-              disabled={createDoctorMutation.isPending || updateDoctorMutation.isPending || isLoadingData}
+              disabled={
+                createDoctorMutation.isPending ||
+                updateDoctorMutation.isPending ||
+                isLoadingData
+              }
               placeholder="09xxxxxxxx"
-              onChange={(event) => setFormData({ ...formData, phone: event.target.value })}
+              onChange={(event) =>
+                setFormData({ ...formData, phone: event.target.value })
+              }
             />
 
             <InputField
@@ -678,9 +812,15 @@ const ModalContent = ({ editingDoctor, specialties = [], clinics = [], createDoc
               type="email"
               value={formData.email}
               error={errors.email}
-              disabled={createDoctorMutation.isPending || updateDoctorMutation.isPending || isLoadingData}
+              disabled={
+                createDoctorMutation.isPending ||
+                updateDoctorMutation.isPending ||
+                isLoadingData
+              }
               placeholder="doctor@shifa.com"
-              onChange={(event) => setFormData({ ...formData, email: event.target.value })}
+              onChange={(event) =>
+                setFormData({ ...formData, email: event.target.value })
+              }
             />
           </div>
 
@@ -689,14 +829,23 @@ const ModalContent = ({ editingDoctor, specialties = [], clinics = [], createDoc
               label="العيادة"
               value={formData.clinic_id}
               error={errors.clinic_id}
-              disabled={createDoctorMutation.isPending || updateDoctorMutation.isPending || isLoadingData}
-              onChange={(event) => setFormData({ ...formData, clinic_id: event.target.value })}
+              disabled={
+                createDoctorMutation.isPending ||
+                updateDoctorMutation.isPending ||
+                isLoadingData
+              }
+              onChange={(event) =>
+                setFormData({ ...formData, clinic_id: event.target.value })
+              }
             >
               <option value="">اختر العيادة</option>
               {clinics.map((clinic) => {
-                const clinicId = clinic?.legacyId ?? clinic?.id ?? clinic?.Clinic_uuid ?? clinic?.uuid;
+                const clinicId = extractIdFromObject(clinic);
                 return (
-                  <option key={clinic.uuid || clinicId || Math.random()} value={clinicId ? String(clinicId) : ""}>
+                  <option
+                    key={clinic.uuid || clinicId || Math.random()}
+                    value={clinicId ? String(clinicId) : ""}
+                  >
                     {clinic.clinicName || clinic.name}
                   </option>
                 );
@@ -707,14 +856,26 @@ const ModalContent = ({ editingDoctor, specialties = [], clinics = [], createDoc
               label="الاختصاص"
               value={formData.specialization_id}
               error={errors.specialization_id}
-              disabled={createDoctorMutation.isPending || updateDoctorMutation.isPending || isLoadingData}
-              onChange={(event) => setFormData({ ...formData, specialization_id: event.target.value })}
+              disabled={
+                createDoctorMutation.isPending ||
+                updateDoctorMutation.isPending ||
+                isLoadingData
+              }
+              onChange={(event) =>
+                setFormData({
+                  ...formData,
+                  specialization_id: event.target.value,
+                })
+              }
             >
               <option value="">اختر الاختصاص</option>
               {specialties.map((specialty) => {
-                const specId = specialty?.legacyId ?? specialty?.id ?? specialty?.uuid;
+                const specId = extractIdFromObject(specialty);
                 return (
-                  <option key={specialty.uuid || specId || Math.random()} value={specId ? String(specId) : ""}>
+                  <option
+                    key={specialty.uuid || specId || Math.random()}
+                    value={specId ? String(specId) : ""}
+                  >
                     {specialty.name}
                   </option>
                 );
@@ -728,9 +889,15 @@ const ModalContent = ({ editingDoctor, specialties = [], clinics = [], createDoc
               type="date"
               value={formData.endcontract}
               error={errors.endcontract}
-              disabled={createDoctorMutation.isPending || updateDoctorMutation.isPending || isLoadingData}
+              disabled={
+                createDoctorMutation.isPending ||
+                updateDoctorMutation.isPending ||
+                isLoadingData
+              }
               min={getTodayISODate()}
-              onChange={(event) => setFormData({ ...formData, endcontract: event.target.value })}
+              onChange={(event) =>
+                setFormData({ ...formData, endcontract: event.target.value })
+              }
             />
 
             <InputField
@@ -742,19 +909,30 @@ const ModalContent = ({ editingDoctor, specialties = [], clinics = [], createDoc
               step="1"
               value={formData.ratio}
               error={errors.ratio}
-              disabled={createDoctorMutation.isPending || updateDoctorMutation.isPending || isLoadingData}
+              disabled={
+                createDoctorMutation.isPending ||
+                updateDoctorMutation.isPending ||
+                isLoadingData
+              }
               placeholder="0 - 100"
-              onChange={(event) => setFormData({ ...formData, ratio: event.target.value })}
+              onChange={(event) =>
+                setFormData({ ...formData, ratio: event.target.value })
+              }
             />
           </div>
 
           <div className="flex flex-col gap-3 pt-2 sm:flex-row">
             <button
               type="submit"
-              disabled={createDoctorMutation.isPending || updateDoctorMutation.isPending || isLoadingData}
+              disabled={
+                createDoctorMutation.isPending ||
+                updateDoctorMutation.isPending ||
+                isLoadingData
+              }
               className="flex-1 cursor-pointer flex items-center justify-center gap-2 rounded-xl theme-accent px-5 py-3 font-bold theme-text-on-accent shadow-lg disabled:opacity-50"
             >
-              {createDoctorMutation.isPending || updateDoctorMutation.isPending ? (
+              {createDoctorMutation.isPending ||
+              updateDoctorMutation.isPending ? (
                 <>
                   <CircularProgress size={18} color="inherit" />
                   <span>جاري الحفظ...</span>
@@ -766,7 +944,11 @@ const ModalContent = ({ editingDoctor, specialties = [], clinics = [], createDoc
             <button
               type="button"
               onClick={onClose}
-              disabled={createDoctorMutation.isPending || updateDoctorMutation.isPending || isLoadingData}
+              disabled={
+                createDoctorMutation.isPending ||
+                updateDoctorMutation.isPending ||
+                isLoadingData
+              }
               className="flex-1 cursor-pointer rounded-xl theme-bg px-5 py-3 font-bold theme-text disabled:opacity-50"
             >
               إلغاء
