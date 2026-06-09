@@ -615,7 +615,6 @@ const COLORS = [
   "#6366f1",
 ];
 
-/** قائمة الفلاتر الجديدة المعتمدة */
 const allPeriodLabels = {
   all: "الكل",
   last_month: "آخر شهر",
@@ -715,7 +714,6 @@ const DashboardPage = () => {
   const dispatch = useDispatch();
   const { period, filterValue } = useSelector((state) => state.dashboard);
 
-  // دالة مساعدة لتنسيق التاريخ بصيغة YYYY-MM-DD بشكل نقي
   const formatDateString = (date) => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -723,44 +721,33 @@ const DashboardPage = () => {
     return `${year}-${month}-${day}`;
   };
 
-  // ───── بناء باراميترات الـ API الذكية تِبعاً للفلاتر الجديدة ─────
   const queryParams = useMemo(() => {
     if (period === "all") return {};
 
     const params = {};
     const today = new Date();
 
-    // 1. معالجة خيار (آخر شهر) -> طرح 30 يوماً
     if (period === "last_month") {
       const past30Days = new Date();
       past30Days.setDate(today.getDate() - 30);
-
       params.end_date = formatDateString(today);
       params.start_date = formatDateString(past30Days);
-    } 
-    // 2. معالجة خيار (آخر سنة) -> طرح 365 يوماً
-    else if (period === "last_year") {
+    } else if (period === "last_year") {
       const past365Days = new Date();
       past365Days.setDate(today.getDate() - 365);
-
       params.end_date = formatDateString(today);
       params.start_date = formatDateString(past365Days);
-    } 
-    // 3. تحديد شهر يدوي معين
-    else if (period === "custom_month") {
+    } else if (period === "custom_month") {
       params.chart_type = "month";
       if (filterValue && filterValue.includes("-")) {
         const [year, month] = filterValue.split("-");
         params.year = parseInt(year, 10);
         params.month = parseInt(month, 10);
       } else {
-        // احتياطي في حال لم يحدد المستخدم قيمة بعد
         params.year = today.getFullYear();
         params.month = today.getMonth() + 1;
       }
-    } 
-    // 4. تحديد سنة يدوية معينة
-    else if (period === "custom_year") {
+    } else if (period === "custom_year") {
       params.chart_type = "year";
       if (filterValue && /^\d{4}$/.test(filterValue)) {
         params.year = parseInt(filterValue, 10);
@@ -776,7 +763,7 @@ const DashboardPage = () => {
 
   const transformed = useMemo(() => {
     if (!apiData) return null;
-    
+
     const {
       general_counts,
       summary,
@@ -829,6 +816,16 @@ const DashboardPage = () => {
 
     const revenueArray = charts.map((c) => c.revenue);
     const patientsArray = charts.map((c) => c.patients);
+    let labelsArray = charts.map((c) => c.label);
+
+    // تعويض التسميات بأرقام الأيام عند الفترات الشهرية
+    if (
+      period === "last_month" ||
+      period === "custom_month" ||
+      period === "month"
+    ) {
+      labelsArray = labelsArray.map((_, idx) => String(idx + 1));
+    }
 
     const departments = specialization_distribution.map((spec, i) => ({
       label: spec.name,
@@ -843,19 +840,47 @@ const DashboardPage = () => {
     }));
 
     const ageGroups = [
-      { label: "0-18", value: demographics.age_groups.kids_0_18, color: COLORS[2] },
-      { label: "19-60", value: demographics.age_groups.adults_19_60, color: COLORS[3] },
-      { label: "60+", value: demographics.age_groups.seniors_above_60, color: COLORS[4] },
+      {
+        label: "0-18",
+        value: demographics.age_groups.kids_0_18,
+        color: COLORS[2],
+      },
+      {
+        label: "19-60",
+        value: demographics.age_groups.adults_19_60,
+        color: COLORS[3],
+      },
+      {
+        label: "60+",
+        value: demographics.age_groups.seniors_above_60,
+        color: COLORS[4],
+      },
     ];
 
     const genderData = [
-      { label: "ذكور", value: demographics.gender.male_percentage, color: COLORS[5] },
-      { label: "إناث", value: demographics.gender.female_percentage, color: COLORS[1] },
+      {
+        label: "ذكور",
+        value: demographics.gender.male_percentage,
+        color: COLORS[5],
+      },
+      {
+        label: "إناث",
+        value: demographics.gender.female_percentage,
+        color: COLORS[1],
+      },
     ];
 
     const patientTypeData = [
-      { label: "جدد", value: appointment_analysis.visit_types.new_visit_percent, color: COLORS[6] },
-      { label: "مراجعات", value: appointment_analysis.visit_types.follow_up_percent, color: COLORS[0] },
+      {
+        label: "جدد",
+        value: appointment_analysis.visit_types.new_visit_percent,
+        color: COLORS[6],
+      },
+      {
+        label: "مراجعات",
+        value: appointment_analysis.visit_types.follow_up_percent,
+        color: COLORS[0],
+      },
     ];
 
     const bookingDetails = {
@@ -874,6 +899,7 @@ const DashboardPage = () => {
       kpis,
       revenue: revenueArray,
       patients: patientsArray,
+      labels: labelsArray,
       departments,
       efficiency,
       ageGroups,
@@ -888,7 +914,7 @@ const DashboardPage = () => {
       doctorsCount: general_counts.doctors_count,
       secretariesCount: general_counts.secretaries_count,
     };
-  }, [apiData]);
+  }, [apiData, period]);
 
   const quickStats = useMemo(() => {
     if (!transformed) return [];
@@ -933,10 +959,9 @@ const DashboardPage = () => {
     ];
   }, [transformed]);
 
-  // دالة مساعدة لتنظيف القيمة المدخلة وتفادي تداخل التنسيقات عند التنقل بين الفلاتر
   const handlePeriodChange = (key) => {
     dispatch(setPeriod(key));
-    dispatch(setFilterValue("")); // تصفير القيمة السابقة لمنع الأخطاء في الإدخال
+    dispatch(setFilterValue(""));
   };
 
   return (
@@ -1008,7 +1033,7 @@ const DashboardPage = () => {
             {(period === "custom_month" || period === "custom_year") && (
               <div className="mt-2 flex flex-wrap items-center gap-2 text-sm border-t theme-border pt-2">
                 <label className="text-sm theme-text-muted">تحديد الفترة يدوياً:</label>
-                
+
                 {period === "custom_month" && (
                   <input
                     type="month"
@@ -1029,7 +1054,7 @@ const DashboardPage = () => {
                     className="w-28 rounded-lg border theme-border theme-surface px-2 py-1 text-sm focus:outline-hidden"
                   />
                 )}
-                {period === 'custom_year' && filterValue.length > 0 && filterValue.length < 4 && (
+                {period === "custom_year" && filterValue.length > 0 && filterValue.length < 4 && (
                   <span className="text-xs text-amber-500 font-semibold">أدخل 4 أرقام</span>
                 )}
               </div>
@@ -1064,13 +1089,9 @@ const DashboardPage = () => {
       {/* ───── المحتوى (تحميل / خطأ / بيانات) ───── */}
       {isLoading ? (
         <DashboardSkeleton />
-      ) : error ? (
+      ) : error || !transformed ? (
         <div className="flex h-64 items-center justify-center rounded-3xl border theme-border theme-surface">
-          <p className="text-lg text-red-500">خطأ في جلب البيانات: {error.message}</p>
-        </div>
-      ) : !transformed ? (
-        <div className="flex h-64 items-center justify-center rounded-3xl border theme-border theme-surface">
-          <p className="text-lg theme-text">لا توجد بيانات</p>
+          <p className="text-lg theme-text-muted">لا توجد بيانات متاحة للفترة المحددة</p>
         </div>
       ) : (
         <>
@@ -1091,7 +1112,11 @@ const DashboardPage = () => {
               subtitle="رسم بياني للإيرادات وعدد المرضى"
               className="xl:col-span-7"
             >
-              <RevenueAreaChart revenue={transformed.revenue} patients={transformed.patients} />
+              <RevenueAreaChart
+                revenue={transformed.revenue}
+                patients={transformed.patients}
+                labels={transformed.labels}
+              />
               <div className="mt-4 grid gap-2 sm:grid-cols-3">
                 <div className="rounded-2xl border theme-border theme-surface px-3 py-2.5">
                   <p className="text-xs font-semibold theme-text-muted">صافي الربح</p>
@@ -1248,16 +1273,6 @@ const DashboardPage = () => {
               </div>
             </GlassCard>
           </div>
-
-          {/* <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
-            <GlassCard
-              title="كفاءة الأطباء"
-              subtitle="عدد المواعيد لكل طبيب"
-              className="xl:col-span-12"
-            >
-              <MiniBarList items={transformed.efficiency} />
-            </GlassCard>
-          </div> */}
         </>
       )}
     </div>

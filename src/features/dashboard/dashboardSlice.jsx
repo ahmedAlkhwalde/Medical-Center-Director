@@ -14,22 +14,26 @@ export const formatNumber = (value) =>
 // دوال مساعدة للرسم البياني
 export const buildAreaPath = (values, width, height, padding) => {
   if (!values.length) return '';
-
   const maxValue = Math.max(...values);
   const minValue = Math.min(...values);
   const range = maxValue - minValue || 1;
-  const stepX = (width - padding * 2) / Math.max(values.length - 1, 1);
+  const padLeft = padding.left ?? padding;
+  const padRight = padding.right ?? padding;
+  const padTop = padding.top ?? padding;
+  const padBottom = padding.bottom ?? padding;
+  const chartWidth = width - padLeft - padRight;
+  const chartHeight = height - padTop - padBottom;
+  const stepX = chartWidth / Math.max(values.length - 1, 1);
 
   return values
     .map((value, index) => {
-      const x = padding + index * stepX;
+      const x = padLeft + index * stepX;
       const normalized = (value - minValue) / range;
-      const y = height - padding - normalized * (height - padding * 2);
+      const y = padTop + chartHeight * (1 - normalized);
       return `${index === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)}`;
     })
     .join(' ');
 };
-
 const initialState = {
   period: 'all',
   filterMode: 'none',
