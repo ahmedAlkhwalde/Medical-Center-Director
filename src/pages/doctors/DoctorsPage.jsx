@@ -295,9 +295,7 @@ const DoctorsPage = () => {
                     specialtyName={doctor.specialization?.name || "غير محدد"}
                     clinicNumber={doctor.clinic?.name || "غير محدد"}
                     onEdit={() => dispatch(openModal(doctor))}
-                    onViewDetails={(doctorUuid) =>
-                      navigate(`/main-page/doctors/${doctorUuid}`)
-                    }
+                    onViewDetails={() => navigate(`/main-page/doctors/${doctor.uuid}`)}
                     onToggleStatus={() => dispatch(confirmDelete(mappedDoctor))}
                   />
                 </div>

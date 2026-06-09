@@ -77,3 +77,16 @@ export const useUpdateDoctorStatusMutation = () => {
     },
   });
 };
+
+
+
+export const useDoctorStatisticsQuery = (uuid, params = {}) => {
+  return useQuery({
+    queryKey: ['doctorStatistics', uuid, params],
+    queryFn: async () => {
+      const response = await apiClient.get(`/admin/statistics/doctor/${uuid}`, { params });
+      return response.data;
+    },
+    enabled: !!uuid, // لا يستدعي إلا عند وجود uuid
+  });
+};
