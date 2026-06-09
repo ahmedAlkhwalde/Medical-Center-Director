@@ -10,6 +10,7 @@ import PatientsRecordsPage from "./patients/PatientsRecordsPage";
 import DashboardPage from "./dashboard/DashboardPage";
 import SchedulePage from "./schedule/SchedulePage";
 import ChatPage from "./chat/ChatPage";
+import ProfilePage from "./profile/ProfilePage";
 
 export default function MainPage() {
   return (
@@ -26,6 +27,7 @@ export default function MainPage() {
           <Route path="map" element={<MapPage />} />
           <Route path="secretary" element={<SecretariesPage />} />
           <Route path="patients-records" element={<PatientsRecordsPage />} />
+          <Route path="profile" element={<ProfilePage />} />
           <Route path="chat" element={<ChatPage />} />
           <Route path="chat/:chatId" element={<ChatPage />} />
         </Routes>
