@@ -90,7 +90,7 @@
 
 // export const { toggleRememberMe, setCredentials, logout } = authSlice.actions;
 // export default authSlice.reducer;
-import { createSlice,current } from "@reduxjs/toolkit";
+import { createSlice, current } from "@reduxjs/toolkit";
 
 const STORAGE_KEY = "manegar_auth";
 
@@ -177,12 +177,12 @@ const authSlice = createSlice({
         },
         state.rememberMe,
       );
-      
     },
 
     updateProfileData: (state, action) => {
       const { name, image } = action.payload;
 
+      // 1. تحديث الاسم والصورة فقط داخل الـ State والمستند الداخلي user
       if (name !== undefined) {
         state.name = name;
         if (state.user) state.user.name = name;
@@ -193,28 +193,22 @@ const authSlice = createSlice({
         if (state.user) state.user.image = image;
       }
 
-      //  الحل السحري: استخراج نسخة صافية من كائن المستخدم المحدث وليس الـ Proxy
-      const plainUser = state.user ? current(state.user) : null;
+      // 2. الحل الأضمن: أخذ نسخة صافية كاملة من الـ State الحالي
+      // لضمان الحفاظ على الـ token وباقي بيانات الـ user (الإيميل، التاريخ، إلخ) دون أي تغيير
+      const cleanState = current(state);
 
-      // الآن نرسل البيانات الصافية للتخزين بأمان
+      // 3. حفظ البيانات في الـ Storage مع الإبقاء على كل شيء آخر كما هو تماماً
       writeStoredAuth(
         {
-          token: state.token,
-          user: plainUser, // 💡 مررنا الكائن الصافي هنا
-          name: state.name,
-          image: state.image,
-          rememberMe: state.rememberMe,
-          lastUsedEmail: state.lastUsedEmail,
+          token: cleanState.token,
+          user: cleanState.user, // هنا كائن الـ user يحتفظ ببياناته الأخرى بالكامل (email, uuid, active...)
+          name: cleanState.name,
+          image: cleanState.image,
+          rememberMe: cleanState.rememberMe,
+          lastUsedEmail: cleanState.lastUsedEmail,
         },
-        state.rememberMe,
+        cleanState.rememberMe,
       );
-
-      // 💡 للطباعة في الكونسول ورؤية البيانات الحقيقية فوراً بدون تعقيدات الـ Proxy:
-      console.log("Credentials updated successfully:", {
-        name: state.name,
-        image: state.image,
-        user: plainUser,
-      });
     },
 
     // تسجيل الخروج وتنظيف الـ State بالكامل
