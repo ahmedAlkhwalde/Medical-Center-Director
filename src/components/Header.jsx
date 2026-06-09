@@ -151,6 +151,7 @@
 import { useState, useRef } from 'react';
 import { useDispatch } from "react-redux";
 import { useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { motion as Motion } from "framer-motion";
 import {
   Search,
@@ -164,6 +165,8 @@ import { toggleMobileMenu } from "../features/uiSlice";
 import SearchResultsDialog from './SearchDialog';
 
 const Header = ({ isDark, onToggleTheme }) => {
+  const name = useSelector((state) => state.auth.name);
+  const image = useSelector((state) => state.auth.image);
   const dispatch = useDispatch();
   const location = useLocation();
   const showThemeToggle = typeof onToggleTheme === "function";
@@ -256,11 +259,12 @@ const Header = ({ isDark, onToggleTheme }) => {
           )}
 
           <div className="hidden items-center gap-3 rounded-2xl border theme-border theme-surface px-3 py-2 shadow-sm sm:flex">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl theme-accent theme-text-on-accent">
-              <Person fontSize="small" />
+            <div className=" flex overflow-hidden h-9 w-9 items-center justify-center rounded-xl theme-accent theme-text-on-accent">
+              {image && <img src={image} alt={name} className="h-full w-full object-cover" />}
+              {/* <Person fontSize="small" /> */}
             </div>
             <div className="text-right leading-tight">
-              <p className="text-xs font-bold theme-text">د. أحمد الخوالدة</p>
+              <p className="text-xs font-bold theme-text">{name}</p>
               <p className="text-[10px] theme-text-muted">المدير التنفيذي</p>
             </div>
           </div>

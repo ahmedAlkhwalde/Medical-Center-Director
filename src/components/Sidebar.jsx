@@ -30,6 +30,7 @@ import SupportAgentIcon from "@mui/icons-material/SupportAgent"; // للسكرت
 import FolderSharedIcon from "@mui/icons-material/FolderShared"; // لسجل المرضى
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined"; // للخريطة
 import ChatRoundedIcon from "@mui/icons-material/ChatRounded"; // للشات
+import PersonIcon from "@mui/icons-material/Person"; // للملف الشخصي
 
 const navItems = [
   {
@@ -75,13 +76,19 @@ const navItems = [
     path: "/main-page/patients-records",
   },
   {
-    id: 8,
+  id: 8,
+  name: "الملف الشخصي",
+  icon: <PersonIcon />, // أو <AccountCircleIcon /> حسب المتاح
+  path: "/main-page/profile",
+},
+  {
+    id: 9,
     name: "خريطة المركز",
     icon: <MapOutlinedIcon />,
     path: "/main-page/map",
   },
   {
-    id: 9,
+    id: 10,
     name: "الشات",
     icon: <ChatRoundedIcon />,
     path: "/main-page/chat",
