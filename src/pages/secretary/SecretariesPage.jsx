@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo,useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { motion as Motion, AnimatePresence } from "framer-motion";
 import {
@@ -8,6 +8,7 @@ import {
   ToggleOffOutlined,
   ToggleOnOutlined,
 } from "@mui/icons-material";
+import { useLocation } from "react-router-dom";
 import SecretaryCard from "./components/SecretaryCard";
 import AddSecretaryModal from "./components/AddSecretaryModal";
 import DeleteConfirmDialog from "./components/DeleteConfirmDialog";
@@ -24,6 +25,7 @@ const normalizeSearchText = (value = "") =>
     .trim();
 
 const SecretariesPage = () => {
+  const location = useLocation();
   const dispatch = useDispatch();
   const { searchQuery } = useSelector((state) => state.ui);
   const { data, isLoading, isError } = useSecretariesQuery();
@@ -95,6 +97,24 @@ const SecretariesPage = () => {
       },
     ];
   }, [apiStats, items]);
+  
+  useEffect(() => {
+    if (!isLoading && location.state?.scrollTo) {
+      const scrollId = location.state.scrollTo;
+      const element = document.querySelector(`[data-scroll-id="${scrollId}"]`);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
+        element.style.boxShadow = "0 0 20px 10px rgba(20, 184, 166, 0.6)";
+        element.style.borderRadius = "1rem";
+        element.style.transition =
+          "box-shadow 0.3s ease, border-radius 0.3s ease";
+        setTimeout(() => {
+          element.style.boxShadow = "";
+          element.style.borderRadius = "";
+        }, 2000);
+      }
+    }
+  }, [isLoading, location.state?.scrollTo]);
 
   const isInitialLoading = isLoading && items.length === 0;
 
@@ -202,7 +222,9 @@ const SecretariesPage = () => {
         >
           <AnimatePresence mode="popLayout">
             {visibleItems.map((item, index) => (
-              <SecretaryCard key={item.id} data={item} index={index} />
+              <div  key={item.uuid} data-scroll-id={`secretary-${item.uuid}`}>
+                <SecretaryCard key={item.id} data={item} index={index} />
+              </div>
             ))}
           </AnimatePresence>
         </Motion.div>

@@ -35,6 +35,7 @@ const normalizeClinicsResponse = (payload) => {
   const stats = {
     total_clinics_count: statsSource?.total_clinics_count ?? items.length,
     most_busy_clinic: statsSource?.most_busy_clinic ?? "",
+    least_busy_clinic: statsSource?.least_busy_clinic ?? "",
     avg_doctors_per_clinic: statsSource?.avg_doctors_per_clinic ?? null,
   };
 

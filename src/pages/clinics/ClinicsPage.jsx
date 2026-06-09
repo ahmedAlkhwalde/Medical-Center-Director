@@ -4,6 +4,7 @@ import { motion as Motion, AnimatePresence } from "framer-motion";
 import {
   Add,
   BusinessOutlined,
+  TrendingDownOutlined,
   LocalFireDepartment,
   PeopleOutline,
 } from "@mui/icons-material";
@@ -27,6 +28,7 @@ const ClinicsPage = () => {
   const { data, isLoading, isError } = useClinicsQuery();
   const items = data?.items ?? [];
   const apiStats = data?.stats ?? {};
+  console.log(apiStats);
 
   const normalizedQuery = useMemo(
     () => normalizeSearchText(searchQuery),
@@ -48,6 +50,7 @@ const ClinicsPage = () => {
   }, [items, normalizedQuery]);
 
   const stats = useMemo(() => {
+    const lessBusyClinic = apiStats.least_busy_clinic;
     const totalCount = apiStats.total_clinics_count ?? items.length;
     const mostBusyClinic =
       apiStats.most_busy_clinic ||
@@ -87,6 +90,13 @@ const ClinicsPage = () => {
       },
       {
         id: 3,
+        label: "الأقل ازدحاما",
+        value: lessBusyClinic || "غير متوفر",
+        note: "حسب عدد المواعيد",
+        icon: <TrendingDownOutlined />,     
+      },
+      {
+        id: 4,
         label: "متوسط الأطباء",
         value: Math.round(averageDoctors),
         note: "أطباء لكل عيادة",

@@ -257,8 +257,9 @@
 // };
 
 // export default SpecialtiesPage;
-import { useMemo } from "react";
+import { useMemo,useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useLocation } from "react-router-dom";
 import { motion as Motion, AnimatePresence } from "framer-motion";
 import {
   Add,
@@ -282,6 +283,7 @@ const formatCurrency = (value = 0) =>
   )} ل.س`;
 
 const SpecialtiesPage = () => {
+  const location = useLocation();
   const { searchQuery } = useSelector((state) => state.ui);
   const dispatch = useDispatch();
   const { data: items = [], isLoading, isError } = useSpecialtiesQuery();
@@ -324,6 +326,8 @@ const SpecialtiesPage = () => {
         leastRequested: "",
       },
     );
+
+    
 
     const averagePrice = items.length ? Math.round(totals.price / items.length) : 0;
     const averageFollowUpPrice = items.length ? Math.round(totals.followUpPrice / items.length) : 0;
@@ -401,6 +405,25 @@ const SpecialtiesPage = () => {
 
     return filled;
   }, [stats]);
+
+
+  useEffect(() => {
+    if (!isLoading && location.state?.scrollTo) {
+      const scrollId = location.state.scrollTo;
+      const element = document.querySelector(`[data-scroll-id="${scrollId}"]`);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
+        element.style.boxShadow = "0 0 20px 10px rgba(20, 184, 166, 0.6)";
+        element.style.borderRadius = "1rem"; // ← أضف هذا السطر
+        element.style.transition =
+          "box-shadow 0.3s ease, border-radius 0.3s ease";
+        setTimeout(() => {
+          element.style.boxShadow = "";
+          element.style.borderRadius = ""; // إعادة التعيين
+        }, 2000);
+      }
+    }
+  }, [isLoading, location.state?.scrollTo]);
 
   return (
     <section className="w-full min-w-0 space-y-6">
@@ -504,7 +527,9 @@ const SpecialtiesPage = () => {
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.28, ease: "easeInOut" }}
               >
-                <SpecialtyCard data={item} index={index} />
+                <div key={item.uuid} data-scroll-id={`specialization-${item.uuid}`}>
+                  <SpecialtyCard data={item} index={index} />
+                </div>
               </Motion.div>
             ))
           ) : (

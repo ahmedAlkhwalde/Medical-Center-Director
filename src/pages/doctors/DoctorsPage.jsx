@@ -1,7 +1,8 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { motion as Motion, AnimatePresence } from "framer-motion";
+import { useLocation } from "react-router-dom";
 import {
   Add,
   FilterAlt,
@@ -25,7 +26,9 @@ const normalizeSearchText = (value = "") =>
     .replace(/\u0640/g, "")
     .trim();
 
+
 const DoctorsPage = () => {
+  const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
@@ -76,6 +79,24 @@ const DoctorsPage = () => {
       return matchesSearch;
     });
   }, [doctors, normalizedSearchQuery]); // 💡 تم حذف selectedSpecialtyId من هنا لأن السيرفر يتكفل بالباقي
+
+  useEffect(() => {
+    if (!isLoading && location.state?.scrollTo) {
+      const scrollId = location.state.scrollTo;
+      const element = document.querySelector(`[data-scroll-id="${scrollId}"]`);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
+        element.style.boxShadow = "0 0 20px 10px rgba(20, 184, 166, 0.6)";
+        element.style.borderRadius = "1rem"; // ← أضف هذا السطر
+        element.style.transition =
+          "box-shadow 0.3s ease, border-radius 0.3s ease";
+        setTimeout(() => {
+          element.style.boxShadow = "";
+          element.style.borderRadius = ""; // إعادة التعيين
+        }, 2000);
+      }
+    }
+  }, [isLoading, location.state?.scrollTo]);
 
   const stats = useMemo(() => {
     return [
@@ -266,17 +287,20 @@ const DoctorsPage = () => {
               };
 
               return (
-                <DoctorCard
-                  key={doctor.uuid}
-                  doctor={mappedDoctor}
-                  specialtyName={doctor.specialization?.name || "غير محدد"}
-                  clinicNumber={doctor.clinic?.name || "غير محدد"}
-                  onEdit={() => dispatch(openModal(doctor))}
-                  onViewDetails={(doctorUuid) =>
-                    navigate(`/main-page/doctors/${doctorUuid}`)
-                  }
-                  onToggleStatus={() => dispatch(confirmDelete(mappedDoctor))}
-                />
+                <div key={doctor.uuid} data-scroll-id={`doctor-${doctor.uuid}`}>
+                  <DoctorCard
+                    key={doctor.uuid}
+                    data-scroll-id={`doctor-${doctor.uuid}`}
+                    doctor={mappedDoctor}
+                    specialtyName={doctor.specialization?.name || "غير محدد"}
+                    clinicNumber={doctor.clinic?.name || "غير محدد"}
+                    onEdit={() => dispatch(openModal(doctor))}
+                    onViewDetails={(doctorUuid) =>
+                      navigate(`/main-page/doctors/${doctorUuid}`)
+                    }
+                    onToggleStatus={() => dispatch(confirmDelete(mappedDoctor))}
+                  />
+                </div>
               );
             })}
           </AnimatePresence>
