@@ -42,7 +42,7 @@ const LoginPage = () => {
 
   useEffect(() => {
     if (lastUsedEmail) {
-      setEmail(lastUsedEmail);
+      // setEmail(lastUsedEmail);
     }
   }, [lastUsedEmail]);
 
