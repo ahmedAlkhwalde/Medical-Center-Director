@@ -62,7 +62,7 @@ const SearchResultsDialog = ({ open, onClose, query }) => {
 
   const groupedResults = { doctors: [], specializations: [], secretaries: [] };
   if (data) {
-    data.doctors?.forEach(d => groupedResults.doctors.push({ id: d.doctor_uuid, name: d.name, subtitle: d.specialization }));
+    data.doctors?.forEach(d => groupedResults.doctors.push({ id: d.uuid, name: d.name, subtitle: d.specialization }));
     data.specializations?.forEach(s => groupedResults.specializations.push({ id: s.uuid, name: s.name }));
     data.secretaries?.forEach(s => groupedResults.secretaries.push({ id: s.uuid, name: s.name }));
   }

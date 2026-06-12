@@ -2,46 +2,11 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* :root {
-    --color-primary: #F8F9FA;     
-    --color-secondary: #FFFFFF; 
-    --color-accent: #2563EB;    
-    --color-accent: #2563EB;   
-    --color-text: #1E3A8A;      
-    --color-grey: #64748B;   
-    --color-border: #E2E8F0;       
-    --color-danger: #EF4444;    
-    --color-on-accent: var(--color-secondary);
-    --color-accent-soft: color-mix(in srgb, var(--color-accent) 12%, transparent);
-    --color-accent-strong: color-mix(in srgb, var(--color-accent) 85%, var(--color-primary));
-    --color-surface-90: color-mix(in srgb, var(--color-secondary) 90%, transparent);
-    --color-surface-hover: color-mix(in srgb, var(--color-secondary) 85%, var(--color-primary));
-    --color-danger-soft: color-mix(in srgb, var(--color-danger) 12%, transparent);
-    --color-overlay: color-mix(in srgb, var(--color-text) 40%, transparent);
-    --color-shadow-accent: color-mix(in srgb, var(--color-accent) 30%, transparent);
-    --main-gradient: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, var(--color-overlay) 100%);
-    --font-family: 'Almarai', sans-serif;
-}
-
-.dark {
-    --color-primary: #1F1F1F;    
-    --color-secondary: #181818;  
-    --color-accent: #3B82F6;    
-    --color-text: #F1F5F9;     
-    --color-grey: #94A3B8;    
-    --color-border: color-mix(in srgb, var(--color-secondary) 70%, var(--color-primary));
-    --color-on-accent: var(--color-text);
-    --color-accent-strong: color-mix(in srgb, var(--color-accent) 70%, var(--color-primary));
-    --color-overlay: color-mix(in srgb, var(--color-primary) 60%, transparent);
-    --color-shadow-accent: color-mix(in srgb, var(--color-accent) 35%, transparent);
-} */
-
-
 :root {
     --color-primary: #F6FEFF;   
     --color-secondary: #FFFFFF;
     
-    --color-accent: #0AB3BA;     
+    --color-accent: #0AB3BA;
     --color-accent-secondary: #F28A4C;
     
     --color-text: #0F172A;  
@@ -82,54 +47,6 @@
     --color-shadow-accent: color-mix(in srgb, var(--color-accent) 40%, transparent);
     --color-surface-hover: color-mix(in srgb, var(--color-secondary) 80%, var(--color-accent));
 }
-
-
-/* :root {
-    --color-primary: #F8F5FA;   
-    --color-secondary: #FFFFFF;
-    
-    --color-accent: #6A1B9A;    
-    --color-accent-secondary: #9C27B0;
-    
-    --color-text: #1A002E;  
-    --color-grey: #64748B;      
-    --color-border: #E1BEE7;
-    
-    --color-success: #10B981;
-    --color-warning: #F59E0B;
-    --color-danger: #EF4444;   
-    --color-info: #3B82F6;
-
-    --color-on-accent: #FFFFFF;
-    --color-accent-soft: color-mix(in srgb, var(--color-accent) 10%, transparent);
-    --color-accent-strong: color-mix(in srgb, var(--color-accent) 85%, var(--color-primary));
-    --color-surface-90: color-mix(in srgb, var(--color-secondary) 90%, transparent);
-    --color-surface-hover: color-mix(in srgb, var(--color-secondary) 95%, var(--color-accent));
-    --color-danger-soft: color-mix(in srgb, var(--color-danger) 10%, transparent);
-    --color-overlay: color-mix(in srgb, var(--color-text) 10%, transparent);
-    --color-shadow-accent: color-mix(in srgb, var(--color-accent) 15%, transparent);
-    
-    --main-gradient: linear-gradient(135deg, #6A1B9A 0%, #8E24AA 100%);
-    --font-family: 'Almarai', sans-serif;
-}
-
-.dark {
-    --color-primary: #09090B;    
-    --color-secondary: #121215;  
-    
-    --color-accent: #A855F7;       
-    
-    --color-text: #FAFAFA;   
-    --color-grey: #A1A1AA;   
-    --color-border: #27272A; 
-    
-    --color-on-accent: #FFFFFF;
-    --color-accent-strong: #C084FC;
-    --color-overlay: rgba(0, 0, 0, 0.4);
-    --color-shadow-accent: rgba(168, 85, 247, 0.1);
-    --color-surface-hover: #18181B;
-} */
-
 
 * {
     font-family: var(--font-family) !important;
