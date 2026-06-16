@@ -50,18 +50,7 @@ const DoctorCard = ({
         </div>
 
         <div className="flex gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
-          {/* <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onViewDetails?.(doctor.id || doctor.uuid);
-            }}
-            className="cursor-pointer rounded-lg p-2 theme-text-muted theme-hover-accent"
-            aria-label="عرض التفاصيل"
-            title="عرض الملف الشخصي"
-          >
-            <PersonOutline fontSize="small" />
-          </button> */}
+   
           <button
             type="button"
             onClick={(e) => {

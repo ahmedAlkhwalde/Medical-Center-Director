@@ -118,7 +118,6 @@ export const useSpecialtiesQuery = (options = {}) => {
   return useQuery({
     queryKey: SPECIALTIES_QUERY_KEY,
     queryFn: fetchSpecialties,
-    // الاعتماد المباشر والصارم على ترتيب المصفوفة القادمة من السيرفر بدون تدخل العميل
     select: (data) => data,
     staleTime: DEFAULT_STALE_TIME,
     ...options,

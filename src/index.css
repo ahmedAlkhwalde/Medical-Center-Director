@@ -3,19 +3,19 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-    --color-primary: #F6FEFF;   
+    --color-primary: #F6FEFF;
     --color-secondary: #FFFFFF;
     
-    --color-accent: #0AB3BA;
+    --color-accent: #0AB3BA;    
     --color-accent-secondary: #F28A4C;
     
-    --color-text: #0F172A;  
-    --color-grey: #475569;      
+    --color-text: #0F172A;
+    --color-grey: #475569;
     --color-border: #E2E8F0;
     
     --color-success: #22C55E;
     --color-warning: #F59E0B;
-    --color-danger: #EF4444;   
+    --color-danger: #EF4444;
     --color-info: #3B82F6;
 
     --color-on-accent: #FFFFFF;
@@ -32,14 +32,14 @@
 }
 
 .dark {
-    --color-primary: #0F172A;    
-    --color-secondary: #1E293B;  
+    --color-primary: #0F172A;
+    --color-secondary: #1E293B;
     
     --color-accent: #0AB3BA;       
     
-    --color-text: #F8FAFC;   
-    --color-grey: #CBD5E1;   
-    --color-border: #334155;    
+    --color-text: #F8FAFC;
+    --color-grey: #CBD5E1;
+    --color-border: #334155;
     
     --color-on-accent: #0F172A;
     --color-accent-strong: color-mix(in srgb, var(--color-accent) 70%, var(--color-primary));
@@ -217,10 +217,110 @@ input[type=number] {
 }
 
 .no-scrollbar {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
 }
 
 .no-scrollbar::-webkit-scrollbar {
     display: none;
+}
+
+*::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: var(--color-border);
+    border-radius: 999px;
+    border: 2px solid var(--color-primary);
+    background-clip: content-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-accent);
+}
+
+*::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+select,
+textarea,
+input,
+option,
+optgroup {
+    color: var(--color-text);
+}
+
+.theme-surface select,
+.theme-surface input,
+.theme-surface textarea,
+.theme-surface option,
+.theme-surface optgroup {
+    background-color: transparent;
+    color: var(--color-text);
+}
+
+select option,
+select optgroup {
+    background-color: var(--color-secondary);
+    color: var(--color-text);
+}
+
+option:disabled {
+    color: var(--color-grey);
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: var(--color-grey);
+    opacity: 1;
+}
+
+select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: none;
+}
+
+select::-ms-expand {
+    display: none;
+}
+
+.dark select,
+.dark select option,
+.dark select optgroup {
+    background-color: var(--color-secondary) !important;
+    color: var(--color-text) !important;
+}
+
+.dark .theme-surface {
+    background-color: var(--color-secondary) !important;
+}
+
+
+.chat-layout-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+}
+
+.chat-header-fixed {
+    flex-shrink: 0 !important;
+    z-index: 50 !important;
+}
+
+.chat-messages-scroll-area {
+    display: flex !important;
+    flex: 1 !important;
+    overflow-y: auto !important; 
+}
+
+.chat-input-fixed {
+    flex-shrink: 0 !important; 
 }

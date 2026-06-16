@@ -11,6 +11,9 @@ import DashboardPage from "./dashboard/DashboardPage";
 import SchedulePage from "./schedule/SchedulePage";
 import ChatPage from "./chat/ChatPage";
 import ProfilePage from "./profile/ProfilePage";
+import ChatList from "../pages/conversation/ChatList";
+import Conversation from "../pages/conversation/Conversation";
+import NotificationPage from "../pages/notification/NotificationPage"
 
 export default function MainPage() {
   return (
@@ -28,8 +31,9 @@ export default function MainPage() {
           <Route path="secretary" element={<SecretariesPage />} />
           <Route path="patients-records" element={<PatientsRecordsPage />} />
           <Route path="profile" element={<ProfilePage />} />
-          <Route path="chat" element={<ChatPage />} />
-          <Route path="chat/:chatId" element={<ChatPage />} />
+          <Route path="conversations" element={<ChatList />} />
+          <Route path="conversations/view/:id" element={<Conversation />} />
+          <Route path="notifications" element={<NotificationPage />} />
         </Routes>
       </Layout>
     </div>

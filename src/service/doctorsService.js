@@ -8,7 +8,6 @@ export const DOCTORS_QUERY_KEY = ["admin", "doctors"];
  */
 export const useDoctorsQuery = (specializationId) => {
   return useQuery({
-    // 💡 تضمين الـ ID في الـ queryKey لكي يعيد الـ Hook جلب البيانات تلقائياً فور تغيره
     queryKey: specializationId ? [...DOCTORS_QUERY_KEY, specializationId] : DOCTORS_QUERY_KEY,
     queryFn: async () => {
       // بناء الـ params وإرسال الـ id فقط إذا كان مختاراً
