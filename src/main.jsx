@@ -8,7 +8,11 @@ import { BrowserRouter } from "react-router-dom";
 import { store } from "./app/store";
 import { Provider } from "react-redux";
 import { applyThemeMode, getInitialThemeMode } from "./app/theme";
+import { registerSW } from "virtual:pwa-register";
 
+
+
+registerSW({ immediate: true });
 applyThemeMode(getInitialThemeMode());
 
 const queryClient = new QueryClient();
