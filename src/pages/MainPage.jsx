@@ -9,7 +9,6 @@ import SecretariesPage from "./secretary/SecretariesPage";
 import PatientsRecordsPage from "./patients/PatientsRecordsPage";
 import DashboardPage from "./dashboard/DashboardPage";
 import SchedulePage from "./schedule/SchedulePage";
-import ChatPage from "./chat/ChatPage";
 import ProfilePage from "./profile/ProfilePage";
 import ChatList from "../pages/conversation/ChatList";
 import Conversation from "../pages/conversation/Conversation";
