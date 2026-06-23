@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import apiClient from "../config/apiClient";
+import { useDispatch } from "react-redux";
+import apiClient from "../../../config/apiClient";
+import { showSnackbar } from "../../uiSlice"; // تأكد من صحة المسار بالنسبة لملف الخدمة
 
 export const CLINICS_QUERY_KEY = ["clinics"];
 const DEFAULT_STALE_TIME = 60 * 1000;
@@ -79,24 +81,36 @@ export const deleteClinic = async (uuid) => {
 };
 
 // ==========================================
-// خطافات الـ Mutations المعتمدة كلياً على كاش وترتيب السيرفر
+// خطافات الـ Mutations (تضم معالجة الـ Snackbar)
 // ==========================================
 
 export const useCreateClinicMutation = (options = {}) => {
   const queryClient = useQueryClient();
+  const dispatch = useDispatch();
   const { onSuccess, onError, onSettled, ...rest } = options;
 
   return useMutation({
     mutationFn: createClinic,
     ...rest,
     onSuccess: (data, variables, context) => {
+      dispatch(
+        showSnackbar({
+          message: "تمت إضافة العيادة بنجاح",
+          variant: "success",
+        }),
+      );
       onSuccess?.(data, variables, context);
     },
     onError: (error, variables, context) => {
+      dispatch(
+        showSnackbar({
+          message: "تعذر إضافة العيادة حالياً",
+          variant: "error",
+        }),
+      );
       onError?.(error, variables, context);
     },
     onSettled: (data, error, variables, context) => {
-      // إعادة جلب كلي للبيانات ليعود الترتيب من السيرفر فوراً
       queryClient.invalidateQueries({ queryKey: CLINICS_QUERY_KEY });
       onSettled?.(data, error, variables, context);
     },
@@ -105,19 +119,31 @@ export const useCreateClinicMutation = (options = {}) => {
 
 export const useUpdateClinicMutation = (options = {}) => {
   const queryClient = useQueryClient();
+  const dispatch = useDispatch();
   const { onSuccess, onError, onSettled, ...rest } = options;
 
   return useMutation({
     mutationFn: updateClinic,
     ...rest,
     onSuccess: (data, variables, context) => {
+      dispatch(
+        showSnackbar({
+          message: "تم تحديث العيادة بنجاح",
+          variant: "success",
+        }),
+      );
       onSuccess?.(data, variables, context);
     },
     onError: (error, variables, context) => {
+      dispatch(
+        showSnackbar({
+          message: "تعذر تحديث العيادة حالياً",
+          variant: "error",
+        }),
+      );
       onError?.(error, variables, context);
     },
     onSettled: (data, error, variables, context) => {
-      // تحديث فوري للكاش من السيرفر
       queryClient.invalidateQueries({ queryKey: CLINICS_QUERY_KEY });
       onSettled?.(data, error, variables, context);
     },
@@ -126,19 +152,31 @@ export const useUpdateClinicMutation = (options = {}) => {
 
 export const useDeleteClinicMutation = (options = {}) => {
   const queryClient = useQueryClient();
+  const dispatch = useDispatch();
   const { onSuccess, onError, onSettled, ...rest } = options;
 
   return useMutation({
     mutationFn: deleteClinic,
     ...rest,
     onSuccess: (data, variables, context) => {
+      dispatch(
+        showSnackbar({
+          message: "تم حذف العيادة بنجاح",
+          variant: "success",
+        }),
+      );
       onSuccess?.(data, variables, context);
     },
     onError: (error, variables, context) => {
+      dispatch(
+        showSnackbar({
+          message: "تعذر حذف العيادة حالياً، يرجى المحاولة مرة أخرى",
+          variant: "error",
+        }),
+      );
       onError?.(error, variables, context);
     },
     onSettled: (data, error, variables, context) => {
-      // تحديث فوري بعد الحذف
       queryClient.invalidateQueries({ queryKey: CLINICS_QUERY_KEY });
       onSettled?.(data, error, variables, context);
     },

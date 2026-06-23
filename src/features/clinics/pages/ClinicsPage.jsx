@@ -1,114 +1,22 @@
-import { useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { motion as Motion, AnimatePresence } from "framer-motion";
-import {
-  Add,
-  BusinessOutlined,
-  TrendingDownOutlined,
-  LocalFireDepartment,
-  PeopleOutline,
-} from "@mui/icons-material";
-import ClinicCard from "./components/ClinicCard";
-import AddClinicModal from "./components/AddClinicModal";
-import DeleteClinicDialog from "./components/DeleteClinicDialog";
-import { openModal } from "../../features/clinics/clinicsSlice";
-import { useClinicsQuery } from "../../service/clinicsService";
-
-const normalizeSearchText = (value = "") =>
-  value
-    .toString()
-    .toLowerCase()
-    .replace(/[\s\p{P}\p{S}]+/gu, "")
-    .replace(/\u0640/g, "")
-    .trim();
+import { Add } from "@mui/icons-material";
+import ClinicCard from "../components/ClinicCard";
+import AddClinicModal from "../components/AddClinicModal";
+import DeleteClinicDialog from "../components/DeleteClinicDialog";
+import { useClinicsPage } from "../hooks/useClinicsPage"; // تأكد من صحة مسار الهوك لديك
 
 const ClinicsPage = () => {
-  const dispatch = useDispatch();
-  const { searchQuery } = useSelector((state) => state.ui);
-  const { data, isLoading, isError } = useClinicsQuery();
-  const items = data?.items ?? [];
-  const apiStats = data?.stats ?? {};
-  console.log(apiStats);
-
-  const normalizedQuery = useMemo(
-    () => normalizeSearchText(searchQuery),
-    [searchQuery],
-  );
-
-  const visibleItems = useMemo(() => {
-    if (!normalizedQuery) {
-      return items;
-    }
-
-    return items.filter((item) => {
-      const searchableText = normalizeSearchText(
-        [item.clinicName, item.address].join(" "),
-      );
-
-      return searchableText.includes(normalizedQuery);
-    });
-  }, [items, normalizedQuery]);
-
-  const stats = useMemo(() => {
-    const lessBusyClinic = apiStats.least_busy_clinic;
-    const totalCount = apiStats.total_clinics_count ?? items.length;
-    const mostBusyClinic =
-      apiStats.most_busy_clinic ||
-      items.reduce(
-        (current, item) =>
-          (item.appointmentsCount ?? 0) > (current?.appointmentsCount ?? -1)
-            ? item
-            : current,
-        null,
-      )?.clinicName ||
-      "غير متوفر";
-    const averageDoctors =
-      apiStats.avg_doctors_per_clinic ??
-      (items.length
-        ? (
-            items.reduce(
-              (sum, item) => sum + (Number(item.doctorsCount) || 0),
-              0,
-            ) / items.length
-          ).toFixed(1)
-        : 0);
-
-    return [
-      {
-        id: 1,
-        label: "إجمالي العيادات",
-        value: totalCount,
-        note: "عدد السجلات المسجلة",
-        icon: <BusinessOutlined />,
-      },
-      {
-        id: 2,
-        label: "الأكثر ازدحاما",
-        value: mostBusyClinic || "غير متوفر",
-        note: "حسب عدد المواعيد",
-        icon: <LocalFireDepartment />,
-      },
-      {
-        id: 3,
-        label: "الأقل ازدحاما",
-        value: lessBusyClinic || "غير متوفر",
-        note: "حسب عدد المواعيد",
-        icon: <TrendingDownOutlined />,     
-      },
-      {
-        id: 4,
-        label: "متوسط الأطباء",
-        value: Math.round(averageDoctors),
-        note: "أطباء لكل عيادة",
-        icon: <PeopleOutline />,
-      },
-    ];
-  }, [apiStats, items]);
-
-  const isInitialLoading = isLoading && items.length === 0;
+  const {
+    stats,
+    visibleItems,
+    isInitialLoading,
+    isError,
+    handleOpenAddModal,
+  } = useClinicsPage();
 
   return (
     <section className="w-full min-w-0 space-y-6">
+      {/* الهيدر وزر الإضافة */}
       <div className="overflow-hidden rounded-3xl border theme-border theme-surface-90 theme-gradient-panel p-4 shadow-sm sm:p-5 md:p-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="space-y-1 text-right">
@@ -124,7 +32,7 @@ const ClinicsPage = () => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             transition={{ duration: 0.3 }}
-            onClick={() => dispatch(openModal())}
+            onClick={handleOpenAddModal}
             type="button"
             className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl theme-accent px-5 py-3 text-sm font-bold theme-text-on-accent shadow-lg transition-all theme-shadow-accent sm:w-auto sm:px-6"
           >
@@ -134,6 +42,7 @@ const ClinicsPage = () => {
         </div>
       </div>
 
+      {/* قسم كروت الإحصائيات */}
       <Motion.div
         layout
         className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
@@ -164,6 +73,7 @@ const ClinicsPage = () => {
         ))}
       </Motion.div>
 
+      {/* شبكة عرض كروت العيادات وحالات التحميل والخطأ */}
       <Motion.div
         layout
         className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-3 xl:gap-6"
@@ -214,6 +124,7 @@ const ClinicsPage = () => {
         </AnimatePresence>
       </Motion.div>
 
+      {/* المودال والـ Dialogs المرافقة */}
       <AddClinicModal />
       <DeleteClinicDialog />
     </section>

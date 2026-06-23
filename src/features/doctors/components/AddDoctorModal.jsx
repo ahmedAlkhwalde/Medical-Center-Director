@@ -586,18 +586,23 @@ import { Close } from "@mui/icons-material";
 import { CircularProgress } from "@mui/material";
 import { closeModal } from "../../../features/doctors/store/doctorsSlice";
 import { useSpecialtiesQuery } from "../../../features/specialties/service/specialtiesService";
-import { useClinicsQuery } from "../../../service/clinicsService";
+import { useClinicsQuery } from "../../clinics/server/clinicsService";
 import { useDoctorForm } from "../hooks/useDoctorForm"; // استيراد الـ Hook المخصص
 
 const AddDoctorModal = () => {
   const { isModalOpen, editingDoctor } = useSelector((state) => state.doctors);
   const dispatch = useDispatch();
 
-  const { data: specialtiesData, isLoading: isLoadingSpecialties } = useSpecialtiesQuery();
-  const { data: clinicsQueryResult, isLoading: isLoadingClinics } = useClinicsQuery();
+  const { data: specialtiesData, isLoading: isLoadingSpecialties } =
+    useSpecialtiesQuery();
+  const { data: clinicsQueryResult, isLoading: isLoadingClinics } =
+    useClinicsQuery();
 
   const specialties = useMemo(() => specialtiesData || [], [specialtiesData]);
-  const clinics = useMemo(() => clinicsQueryResult?.items || [], [clinicsQueryResult]);
+  const clinics = useMemo(
+    () => clinicsQueryResult?.items || [],
+    [clinicsQueryResult],
+  );
 
   return (
     <AnimatePresence>
@@ -630,8 +635,14 @@ const ModalContent = ({
     handleSubmit,
     isPending,
     isDisabled,
-    extractIdFromObject
-  } = useDoctorForm({ editingDoctor, clinics, specialties, isLoadingData, onClose });
+    extractIdFromObject,
+  } = useDoctorForm({
+    editingDoctor,
+    clinics,
+    specialties,
+    isLoadingData,
+    onClose,
+  });
 
   console.log("Full editingDoctor:", editingDoctor);
 
@@ -657,7 +668,8 @@ const ModalContent = ({
               {editingDoctor ? "تعديل بيانات الطبيب" : "إضافة طبيب جديد"}
             </h3>
             <p className="mt-1 text-sm theme-text-muted">
-              أدخل البيانات وسيتم ربط المعرفات الخاصة بالعيادة والاختصاص تلقائياً.
+              أدخل البيانات وسيتم ربط المعرفات الخاصة بالعيادة والاختصاص
+              تلقائياً.
             </p>
           </div>
 
@@ -678,7 +690,9 @@ const ModalContent = ({
             error={errors.name}
             disabled={isDisabled}
             placeholder="مثال: د. أحمد علي"
-            onChange={(event) => setFormData({ ...formData, name: event.target.value })}
+            onChange={(event) =>
+              setFormData({ ...formData, name: event.target.value })
+            }
           />
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -688,7 +702,9 @@ const ModalContent = ({
               error={errors.phone}
               disabled={isDisabled}
               placeholder="09xxxxxxxx"
-              onChange={(event) => setFormData({ ...formData, phone: event.target.value })}
+              onChange={(event) =>
+                setFormData({ ...formData, phone: event.target.value })
+              }
             />
 
             <InputField
@@ -698,7 +714,9 @@ const ModalContent = ({
               error={errors.email}
               disabled={isDisabled}
               placeholder="doctor@shifa.com"
-              onChange={(event) => setFormData({ ...formData, email: event.target.value })}
+              onChange={(event) =>
+                setFormData({ ...formData, email: event.target.value })
+              }
             />
           </div>
 
@@ -708,7 +726,9 @@ const ModalContent = ({
               value={formData.clinic_id}
               error={errors.clinic_id}
               disabled={isDisabled}
-              onChange={(event) => setFormData({ ...formData, clinic_id: event.target.value })}
+              onChange={(event) =>
+                setFormData({ ...formData, clinic_id: event.target.value })
+              }
             >
               <option value="">اختر العيادة</option>
               {clinics.map((clinic) => {
@@ -729,7 +749,12 @@ const ModalContent = ({
               value={formData.specialization_id}
               error={errors.specialization_id}
               disabled={isDisabled}
-              onChange={(event) => setFormData({ ...formData, specialization_id: event.target.value })}
+              onChange={(event) =>
+                setFormData({
+                  ...formData,
+                  specialization_id: event.target.value,
+                })
+              }
             >
               <option value="">اختر الاختصاص</option>
               {specialties.map((specialty) => {
@@ -753,7 +778,9 @@ const ModalContent = ({
               value={formData.endcontract}
               error={errors.endcontract}
               disabled={isDisabled}
-              onChange={(event) => setFormData({ ...formData, endcontract: event.target.value })}
+              onChange={(event) =>
+                setFormData({ ...formData, endcontract: event.target.value })
+              }
             />
 
             <InputField
@@ -767,7 +794,9 @@ const ModalContent = ({
               error={errors.ratio}
               disabled={isDisabled}
               placeholder="0 - 100"
-              onChange={(event) => setFormData({ ...formData, ratio: event.target.value })}
+              onChange={(event) =>
+                setFormData({ ...formData, ratio: event.target.value })
+              }
             />
           </div>
 

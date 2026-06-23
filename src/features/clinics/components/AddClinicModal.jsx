@@ -1,21 +1,9 @@
-import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { Close } from "@mui/icons-material";
-import { closeModal } from "../../../features/clinics/clinicsSlice";
-import { showSnackbar } from "../../../features/uiSlice";
-import {
-  useCreateClinicMutation,
-  useUpdateClinicMutation,
-} from "../../../service/clinicsService";
-
-const createInitialFormData = (editingItem) => ({
-  clinicName: editingItem?.clinicName || "",
-  address: editingItem?.address || "",
-});
+import { useClinicForm } from "../hooks/useClinicForm"; // تأكد من صحة مسار الهوك لديك
 
 const AddClinicModal = () => {
   const { isModalOpen, editingItem } = useSelector((state) => state.clinics);
-  const dispatch = useDispatch();
 
   if (!isModalOpen) return null;
 
@@ -23,117 +11,25 @@ const AddClinicModal = () => {
     <ModalContent
       key={editingItem ? editingItem.id : "new"}
       editingItem={editingItem}
-      onClose={() => dispatch(closeModal())}
     />
   );
 };
 
-const ModalContent = ({ editingItem, onClose }) => {
-  const [formData, setFormData] = useState(() =>
-    createInitialFormData(editingItem),
-  );
-  const [errors, setErrors] = useState({});
-  const dispatch = useDispatch();
-
-  // خطاف إضافة عيادة جديدة
-  const createClinicMutation = useCreateClinicMutation({
-    onSuccess: () => {
-      dispatch(
-        showSnackbar({
-          message: "تمت إضافة العيادة بنجاح",
-          variant: "success",
-        }),
-      );
-      dispatch(closeModal()); // يغلق المودال فقط عند النجاح
-    },
-    onError: () => {
-      dispatch(
-        showSnackbar({
-          message: "تعذر إضافة العيادة حالياً",
-          variant: "error",
-        }),
-      );
-      // يبقى المودال مفتوحاً تلقائياً
-    },
-  });
-
-  // خطاف تعديل عيادة سابقة
-  const updateClinicMutation = useUpdateClinicMutation({
-    onSuccess: () => {
-      dispatch(
-        showSnackbar({
-          message: "تم تحديث العيادة بنجاح",
-          variant: "success",
-        }),
-      );
-      dispatch(closeModal()); // يغلق المودال فقط عند النجاح
-    },
-    onError: () => {
-      dispatch(
-        showSnackbar({
-          message: "تعذر تحديث العيادة حالياً",
-          variant: "error",
-        }),
-      );
-      // يبقى المودال مفتوحاً تلقائياً
-    },
-  });
-
-  const isSubmitting =
-    createClinicMutation.isPending || updateClinicMutation.isPending;
-
-  const validate = () => {
-    const newErrors = {};
-
-    if (!formData.clinicName.trim()) {
-      newErrors.clinicName = "اسم العيادة مطلوب";
-    }
-
-    if (!formData.address.trim()) {
-      newErrors.address = "العنوان مطلوب";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-
-    if (!validate() || isSubmitting) return;
-
-    const payload = {
-      clinicName: formData.clinicName.trim(),
-      name: formData.clinicName.trim(),
-      clinic_name: formData.clinicName.trim(),
-      address: formData.address.trim(),
-    };
-
-    if (editingItem) {
-      const targetId = editingItem.uuid;
-      if (!targetId) {
-        dispatch(
-          showSnackbar({
-            message: "معرّف العيادة غير متوفر للتعديل",
-            variant: "error",
-          }),
-        );
-        return;
-      }
-      // يتم الإرسال المباشر دون إغلاق المودال مسبقاً
-      updateClinicMutation.mutate({ uuid: targetId, payload });
-      return;
-    }
-
-    // يتم الإرسال المباشر لإنشاء عيادة جديدة دون إغلاق المودال مسبقاً
-    createClinicMutation.mutate(payload);
-  };
+const ModalContent = ({ editingItem }) => {
+  const {
+    formData,
+    errors,
+    isSubmitting,
+    handleSubmit,
+    handleFieldChange,
+    handleClose,
+  } = useClinicForm(editingItem);
 
   return (
     <div className="fixed inset-0 z-10000 flex items-center justify-center p-3 sm:p-4">
-      {/* الخلفية المظلمة الفورية */}
+      {/* الخلفية المظلمة */}
       <div
-        onClick={() => !isSubmitting && onClose()}
+        onClick={() => !isSubmitting && handleClose()}
         className="absolute inset-0 theme-overlay backdrop-blur-sm"
       />
 
@@ -151,7 +47,7 @@ const ModalContent = ({ editingItem, onClose }) => {
 
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             disabled={isSubmitting}
             className="rounded-xl p-2 theme-hover-surface theme-text-muted transition-colors disabled:opacity-50"
             aria-label="إغلاق النافذة"
@@ -167,9 +63,7 @@ const ModalContent = ({ editingItem, onClose }) => {
             error={errors.clinicName}
             placeholder="مثال: عيادة الشفاء - المزة"
             disabled={isSubmitting}
-            onChange={(event) =>
-              setFormData({ ...formData, clinicName: event.target.value })
-            }
+            onChange={(event) => handleFieldChange("clinicName", event.target.value)}
           />
 
           <TextareaField
@@ -178,9 +72,7 @@ const ModalContent = ({ editingItem, onClose }) => {
             error={errors.address}
             placeholder="مثال: دمشق - المزة - شارع الفيلات"
             disabled={isSubmitting}
-            onChange={(event) =>
-              setFormData({ ...formData, address: event.target.value })
-            }
+            onChange={(event) => handleFieldChange("address", event.target.value)}
           />
 
           <div className="flex flex-col gap-3 pt-2 sm:flex-row">
@@ -220,10 +112,10 @@ const ModalContent = ({ editingItem, onClose }) => {
                 "حفظ العيادة"
               )}
             </button>
-            
+
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               disabled={isSubmitting}
               className="flex-1 cursor-pointer rounded-xl theme-bg px-5 py-3 font-bold theme-text disabled:opacity-50 disabled:cursor-not-allowed"
             >

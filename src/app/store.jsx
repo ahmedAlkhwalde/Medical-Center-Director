@@ -4,7 +4,7 @@ import uiReducer from "../features/uiSlice";
 import authReducer from "../features/auth/store/authSlice";
 import specialtiesReducer from "../features/specialties/store/specialtiesSlice";
 import doctorsReducer from "../features/doctors/store/doctorsSlice";
-import clinicsReducer from "../features/clinics/clinicsSlice";
+import clinicsReducer from "../features/clinics/store/clinicsSlice";
 import mapReducer from "../features/map/mapSlice";
 import secretariesReducer from "../features/secretaries/secretariesSlice";
 import patientsReducer from "../features/patients/patientsSlice";

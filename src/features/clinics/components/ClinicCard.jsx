@@ -9,8 +9,7 @@ import { useDispatch } from "react-redux";
 import {
   confirmDelete,
   openModal,
-} from "../../../features/clinics/clinicsSlice";
-
+} from "../../../features/clinics/store/clinicsSlice";
 
 const ClinicCard = ({ data }) => {
   const dispatch = useDispatch();

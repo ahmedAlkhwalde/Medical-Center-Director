@@ -3,7 +3,7 @@ import Layout from "../components/Layout";
 import SpecialtiesPage from "../features/specialties/pages/SpecialtiesPage";
 import DoctorsPage from "../features/doctors/pages/DoctorsPage";
 import DoctorDetailPage from "../features/doctors/pages/DoctorDetailPage";
-import ClinicsPage from "./clinics/ClinicsPage";
+import ClinicsPage from "../features/clinics/pages/ClinicsPage";
 import MapPage from "./map/MapPage";
 import SecretariesPage from "./secretary/SecretariesPage";
 import PatientsRecordsPage from "./patients/PatientsRecordsPage";
