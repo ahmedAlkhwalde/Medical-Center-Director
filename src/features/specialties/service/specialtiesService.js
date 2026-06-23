@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import apiClient from "../config/apiClient";
+import apiClient from "../../../config/apiClient";
 
 export const SPECIALTIES_QUERY_KEY = ["specialties"];
 const DEFAULT_STALE_TIME = 60 * 1000;

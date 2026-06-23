@@ -15,7 +15,7 @@ import DoctorCard from "./components/DoctorCard";
 import AddDoctorModal from "./components/AddDoctorModal";
 import DoctorStatusConfirmDialog from "./components/DoctorStatusConfirmDialog";
 import { openModal, confirmDelete } from "../../features/doctors/doctorsSlice";
-import { useSpecialtiesQuery } from "../../service/specialtiesService";
+import { useSpecialtiesQuery } from "../../features/specialties/service/specialtiesService";
 import { useDoctorsQuery } from "../../service/doctorsService";
 
 const normalizeSearchText = (value = "") =>
@@ -25,7 +25,6 @@ const normalizeSearchText = (value = "") =>
     .replace(/[\s\p{P}\p{S}]+/gu, "")
     .replace(/\u0640/g, "")
     .trim();
-
 
 const DoctorsPage = () => {
   const location = useLocation();
@@ -295,7 +294,9 @@ const DoctorsPage = () => {
                     specialtyName={doctor.specialization?.name || "غير محدد"}
                     clinicNumber={doctor.clinic?.name || "غير محدد"}
                     onEdit={() => dispatch(openModal(doctor))}
-                    onViewDetails={() => navigate(`/main-page/doctors/${doctor.uuid}`)}
+                    onViewDetails={() =>
+                      navigate(`/main-page/doctors/${doctor.uuid}`)
+                    }
                     onToggleStatus={() => dispatch(confirmDelete(mappedDoctor))}
                   />
                 </div>

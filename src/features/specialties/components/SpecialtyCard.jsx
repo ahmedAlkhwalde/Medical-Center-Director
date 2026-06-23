@@ -1,24 +1,19 @@
 import { EditOutlined, DeleteOutline } from "@mui/icons-material";
 import * as MuiIcons from "@mui/icons-material";
 import { useDispatch } from "react-redux";
-import {
-  openModal,
-  confirmDelete,
-} from "../../../features/specialties/specialtiesSlice";
+import { openModal, confirmDelete } from "../store/specialtiesSlice";
 
 const SpecialtyCard = ({ data }) => {
   const dispatch = useDispatch();
   const IconComponent = MuiIcons[data.icon] || MuiIcons.MedicalServices;
 
   return (
-    <div
-      className="group relative rounded-2xl border theme-border theme-surface p-4 shadow-md shadow-black/5 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/15 hover:theme-shadow-accent sm:p-5 md:p-6"
-    >
+    <div className="group relative rounded-2xl border theme-border theme-surface p-4 shadow-md shadow-black/5 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/15 hover:theme-shadow-accent sm:p-5 md:p-6">
       <div className="flex items-start justify-between gap-3 mb-5 sm:mb-6">
         <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-xl theme-accent-soft theme-text-accent transition-transform duration-300 group-hover:scale-105">
           <IconComponent fontSize="large" />
         </div>
-        
+
         {/* أزرار التحكم تظهر بسلاسة عند تمرير الماوس (Hover) */}
         <div className="flex gap-1 opacity-100 transition-opacity duration-200 sm:opacity-0 sm:group-hover:opacity-100">
           <button

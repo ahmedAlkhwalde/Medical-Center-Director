@@ -1,13 +1,13 @@
 import { useState, useEffect, useMemo } from "react";
 import { useSchedulesQuery } from "../service/schedulesService";
-import { useSpecialtiesQuery } from "../../../service/specialtiesService";
+import { useSpecialtiesQuery } from "../../specialties/service/specialtiesService";
 import { normalizeSearchText } from "../components/scheduleFormatters";
 
 export const useSchedule = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSpecialtyId, setSelectedSpecialtyId] = useState("");
   const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== "undefined" ? window.innerWidth < 768 : false
+    typeof window !== "undefined" ? window.innerWidth < 768 : false,
   );
 
   // جلب الاختصاصات من الخادم
@@ -38,7 +38,9 @@ export const useSchedule = () => {
 
     return schedules.filter((item) => {
       const searchableText = normalizeSearchText(
-        [item.doctor.name, item.doctor.specialization, item.doctor.clinic].join(" ")
+        [item.doctor.name, item.doctor.specialization, item.doctor.clinic].join(
+          " ",
+        ),
       );
 
       return !normalizedQuery || searchableText.includes(normalizedQuery);

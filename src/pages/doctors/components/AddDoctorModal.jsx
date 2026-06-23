@@ -4,7 +4,7 @@ import { motion as Motion, AnimatePresence } from "framer-motion";
 import { Close } from "@mui/icons-material";
 import { CircularProgress } from "@mui/material";
 import { closeModal } from "../../../features/doctors/doctorsSlice";
-import { useSpecialtiesQuery } from "../../../service/specialtiesService";
+import { useSpecialtiesQuery } from "../../../features/specialties/service/specialtiesService";
 import { useClinicsQuery } from "../../../service/clinicsService";
 import {
   useCreateDoctorMutation,
@@ -23,7 +23,13 @@ const isPastDate = (value) => value < getTodayISODate();
 // دالة مساعدة لاستخراج أي معرّف من كائن (عيادة / اختصاص)
 const extractIdFromObject = (obj) => {
   if (!obj) return undefined;
-  return obj?.legacyId ?? obj?.id ?? obj?.uuid ?? obj?.Clinic_uuid ?? obj?.Specialization_uuid;
+  return (
+    obj?.legacyId ??
+    obj?.id ??
+    obj?.uuid ??
+    obj?.Clinic_uuid ??
+    obj?.Specialization_uuid
+  );
 };
 
 // دالة لاستخراج معرف الطبيب الأصلي للعيادة أو الاختصاص

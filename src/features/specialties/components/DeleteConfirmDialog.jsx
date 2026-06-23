@@ -1,41 +1,13 @@
-import { useDispatch, useSelector } from "react-redux";
-import { closeDeleteDialog } from "../../../features/specialties/specialtiesSlice";
-import { showSnackbar } from "../../../features/uiSlice";
-import { useDeleteSpecialtyMutation } from "../../../service/specialtiesService";
+import React from "react";
+import { useDeleteSpecialty } from "../hooks/useDeleteSpecialty";
 
 const DeleteConfirmDialog = () => {
-  const { isDeleteSheetOpen, itemToDelete } = useSelector(
-    (state) => state.specialties,
-  );
-  const dispatch = useDispatch();
-
-  const deleteSpecialtyMutation = useDeleteSpecialtyMutation({
-    onSuccess: () => {
-      // يغلق الـ Dialog وتظهر رسالة النجاح فقط عند اكتمال العملية بنجاح
-      dispatch(closeDeleteDialog());
-      dispatch(
-        showSnackbar({
-          message: "تم حذف الاختصاص بنجاح",
-          variant: "success",
-        }),
-      );
-    },
-    onError: () => {
-      // يبقى الـ Dialog مفتوحاً وتظهر رسالة الخطأ هنا في حال الفشل
-      dispatch(
-        showSnackbar({
-          message: "تعذر حذف الاختصاص حالياً",
-          variant: "error",
-        }),
-      );
-    },
-  });
-
-  const handleDelete = () => {
-    if (!itemToDelete || deleteSpecialtyMutation.isPending) return;
-    // 💡 تم إزالة التسكير المسبق من هنا لضمان بقاء الـ Dialog مفتوحاً حتى انتهاء الاستجابة
-    deleteSpecialtyMutation.mutate(itemToDelete);
-  };
+  const {
+    isDeleteSheetOpen,
+    isPending,
+    handleDelete,
+    handleClose,
+  } = useDeleteSpecialty();
 
   if (!isDeleteSheetOpen) return null;
 
@@ -46,7 +18,7 @@ const DeleteConfirmDialog = () => {
     >
       {/* الخلفية المظلمة */}
       <div
-        onClick={() => !deleteSpecialtyMutation.isPending && dispatch(closeDeleteDialog())}
+        onClick={handleClose}
         className="absolute inset-0 theme-overlay backdrop-blur-sm"
       />
 
@@ -55,20 +27,20 @@ const DeleteConfirmDialog = () => {
         <div className="w-16 h-16 theme-danger-soft theme-text-danger rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-bold">
           !
         </div>
-        
+
         <h3 className="text-xl font-bold theme-text mb-2">هل أنت متأكد؟</h3>
         <p className="theme-text-muted mb-6 text-sm">
           لا يمكن التراجع عن عملية الحذف بعد إتمامها.
         </p>
 
         <div className="flex gap-3">
-          {/* زر الحذف مع الـ Spinner */}
+          {/* زر الحذف مع الـ Spinner التفاعلي */}
           <button
             onClick={handleDelete}
-            disabled={deleteSpecialtyMutation.isPending}
+            disabled={isPending}
             className="flex-1 flex cursor-pointer items-center justify-center gap-2 theme-danger-soft theme-text-danger font-bold py-3 rounded-xl theme-hover-danger-solid transition-all disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            {deleteSpecialtyMutation.isPending ? (
+            {isPending ? (
               <>
                 <svg
                   className="animate-spin h-5 w-5 theme-text-danger"
@@ -87,7 +59,6 @@ const DeleteConfirmDialog = () => {
                   <path
                     className="opacity-75"
                     fill="currentColor"
-                    document-dir="rtl"
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   />
                 </svg>
@@ -100,8 +71,8 @@ const DeleteConfirmDialog = () => {
 
           {/* زر الإلغاء */}
           <button
-            onClick={() => dispatch(closeDeleteDialog())}
-            disabled={deleteSpecialtyMutation.isPending}
+            onClick={handleClose}
+            disabled={isPending}
             className="flex-1 cursor-pointer theme-bg theme-text font-bold py-3 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
           >
             إلغاء

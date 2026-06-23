@@ -2,7 +2,7 @@ import dashboardReducer from "../features/dashboard/store/dashboardSlice";
 import { configureStore } from "@reduxjs/toolkit";
 import uiReducer from "../features/uiSlice";
 import authReducer from "../features/auth/store/authSlice";
-import specialtiesReducer from "../features/specialties/specialtiesSlice";
+import specialtiesReducer from "../features/specialties/store/specialtiesSlice";
 import doctorsReducer from "../features/doctors/doctorsSlice";
 import clinicsReducer from "../features/clinics/clinicsSlice";
 import mapReducer from "../features/map/mapSlice";
