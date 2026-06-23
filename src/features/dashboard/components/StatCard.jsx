@@ -1,3 +1,4 @@
+import React from "react";
 import { motion as Motion } from "framer-motion";
 import {
   Payments,
@@ -6,17 +7,46 @@ import {
   WarningAmber,
   TrendingUp,
   TrendingDown,
+  // استيراد الأيقونات الطبية والمالية الجديدة لضمان الدعم الكامل
+  MedicalServices,
+  SupportAgent,
+  PeopleAlt,
+  AccountBalanceWallet,
+  Paid,
+  EventBusy
 } from "@mui/icons-material";
 
+// قاموس موسّع كخطة بديلة (Fallback) في حال تم تمرير الأيقونة كاسم نصي (String)
 const iconMap = {
   Payments,
   Groups,
   LocalHospital,
   WarningAmber,
+  MedicalServices,
+  SupportAgent,
+  PeopleAlt,
+  AccountBalanceWallet,
+  Paid,
+  EventBusy
 };
 
 const StatCard = ({ item }) => {
-  const Icon = iconMap[item.icon] || Payments;
+  
+  // دالة تشغيلية ذكية لـ رندرة الأيقونة بمرونة تامة مهما كان نوعها
+  const renderIcon = () => {
+    if (!item.icon) return <Payments fontSize="small" />;
+
+    // 1. إذا كانت الأيقونة ممررة كـ JSX Element جاهز مثل: <MedicalServices className="..." />
+    if (React.isValidElement(item.icon)) {
+      return item.icon;
+    }
+
+    // 2. إذا كانت ممررة كـ Component Reference (مثل: MedicalServices) أو كنص (String)
+    const ChosenIcon = typeof item.icon === "string" ? iconMap[item.icon] : item.icon;
+    const IconComponent = ChosenIcon || Payments;
+
+    return <IconComponent fontSize="small" />;
+  };
 
   return (
     <Motion.div
@@ -34,10 +64,13 @@ const StatCard = ({ item }) => {
           </p>
           <p className="text-[11px] leading-5 theme-text-muted">{item.note}</p>
         </div>
+        
         <div className="flex flex-col items-end gap-1.5">
+          {/* هنا يتم استدعاء الدالة الذكية لطباعة الأيقونة الصحيحة فوراً */}
           <span className="flex h-9 w-9 items-center justify-center rounded-xl theme-accent text-white shadow-lg shadow-teal-500/15">
-            <Icon fontSize="small" />
+            {renderIcon()}
           </span>
+          
           <span
             className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
               item.trendUp

@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { buildAreaPath } from '../../../features/dashboard/dashboardSlice';
+import { useMemo } from "react";
+import { buildAreaPath } from "../../../features/dashboard/store/dashboardSlice";
 
 const RevenueAreaChart = ({ revenue = [], patients = [], labels = [] }) => {
   const width = 820;
@@ -8,11 +8,11 @@ const RevenueAreaChart = ({ revenue = [], patients = [], labels = [] }) => {
 
   const revenuePath = useMemo(
     () => buildAreaPath(revenue, width, height, padding),
-    [revenue, width, height, padding]
+    [revenue, width, height, padding],
   );
   const patientsPath = useMemo(
     () => buildAreaPath(patients, width, height, padding),
-    [patients, width, height, padding]
+    [patients, width, height, padding],
   );
 
   const maxRevenue = Math.max(...revenue, 1);
@@ -26,9 +26,10 @@ const RevenueAreaChart = ({ revenue = [], patients = [], labels = [] }) => {
   };
 
   // إحداثيات X للنقاط والتسميات (إذا وُجدت تسميات)
-  const stepX = labels.length > 1
-    ? (width - padding.left - padding.right) / (labels.length - 1)
-    : 0;
+  const stepX =
+    labels.length > 1
+      ? (width - padding.left - padding.right) / (labels.length - 1)
+      : 0;
   const pointsX = labels.map((_, idx) => padding.left + idx * stepX);
 
   // إنشاء مسار للنقاط فقط إذا كانت البيانات موجودة
@@ -137,7 +138,8 @@ const RevenueAreaChart = ({ revenue = [], patients = [], labels = [] }) => {
           <span className="w-3 h-0.5 bg-[#0ea5e9] inline-block" /> الإيرادات
         </span>
         <span className="flex items-center gap-1">
-          <span className="w-3 h-0.5 bg-[#f97316] inline-block border-dashed" /> المرضى
+          <span className="w-3 h-0.5 bg-[#f97316] inline-block border-dashed" />{" "}
+          المرضى
         </span>
       </div>
     </div>

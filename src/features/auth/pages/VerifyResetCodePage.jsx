@@ -4,7 +4,6 @@ import ResetAuthLayout from "../Components/ResetAuthLayout";
 import { useVerifyResetCode } from "../hooks/useVerifyResetCode"; // استيراد الـ Controller المخصص
 
 const VerifyResetCodePage = () => {
-  // تفكيك الأدوات والحالات من الهوك الذكي
   const {
     code,
     timeLeft,

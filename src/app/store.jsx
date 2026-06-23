@@ -1,4 +1,4 @@
-import dashboardReducer from "../features/dashboard/dashboardSlice";
+import dashboardReducer from "../features/dashboard/store/dashboardSlice";
 import { configureStore } from "@reduxjs/toolkit";
 import uiReducer from "../features/uiSlice";
 import authReducer from "../features/auth/store/authSlice";

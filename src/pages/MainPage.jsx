@@ -7,12 +7,12 @@ import ClinicsPage from "./clinics/ClinicsPage";
 import MapPage from "./map/MapPage";
 import SecretariesPage from "./secretary/SecretariesPage";
 import PatientsRecordsPage from "./patients/PatientsRecordsPage";
-import DashboardPage from "./dashboard/DashboardPage";
+import DashboardPage from "../features/dashboard/pages/DashboardPage";
 import SchedulePage from "./schedule/SchedulePage";
 import ProfilePage from "./profile/ProfilePage";
 import ChatList from "../pages/conversation/ChatList";
 import Conversation from "../pages/conversation/Conversation";
-import NotificationPage from "../pages/notification/NotificationPage"
+import NotificationPage from "../pages/notification/NotificationPage";
 
 export default function MainPage() {
   return (
