@@ -8,7 +8,7 @@ import clinicsReducer from "../features/clinics/clinicsSlice";
 import mapReducer from "../features/map/mapSlice";
 import secretariesReducer from "../features/secretaries/secretariesSlice";
 import patientsReducer from "../features/patients/patientsSlice";
-import scheduleReducer from "../features/schedule/scheduleSlice";
+import scheduleReducer from "../features/schedule/store/scheduleSlice";
 import chatReducer from "../features/chat/chatSlice";
 import profileReducer from "../features/profile/profileSlice";
 

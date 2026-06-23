@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import apiClient from "../config/apiClient"; // تأكد من المسار الصحيح لديك
+import apiClient from "../../../config/apiClient"; // تأكد من المسار الصحيح لديك
 
 // خريطة تحويل الأيام
 const DAY_MAPPING = {

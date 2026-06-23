@@ -1,5 +1,5 @@
 import { motion as Motion } from "framer-motion";
-import { WEEK_DAYS } from "../../../features/schedule/scheduleSlice";
+import { WEEK_DAYS } from "../store/scheduleSlice";
 import ShiftCell from "./ShiftCell";
 import DoctorSummaryCard from "./DoctorSummaryCard";
 

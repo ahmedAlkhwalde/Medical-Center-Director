@@ -8,7 +8,7 @@ import MapPage from "./map/MapPage";
 import SecretariesPage from "./secretary/SecretariesPage";
 import PatientsRecordsPage from "./patients/PatientsRecordsPage";
 import DashboardPage from "../features/dashboard/pages/DashboardPage";
-import SchedulePage from "./schedule/SchedulePage";
+import SchedulePage from "../features/schedule/pages/SchedulePage";
 import ProfilePage from "./profile/ProfilePage";
 import ChatList from "../pages/conversation/ChatList";
 import Conversation from "../pages/conversation/Conversation";

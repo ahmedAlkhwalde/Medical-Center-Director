@@ -1,4 +1,4 @@
-import { formatScheduleValue } from "../scheduleFormatters";
+import { formatScheduleValue } from "./scheduleFormatters";
 
 const ShiftCell = ({ shift }) => {
   if (!shift) {

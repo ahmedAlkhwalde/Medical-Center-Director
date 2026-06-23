@@ -1,4 +1,4 @@
-import { WEEK_DAYS } from "../../../features/schedule/scheduleSlice";
+import { WEEK_DAYS } from "../store/scheduleSlice";
 import ShiftCell from "./ShiftCell";
 import DoctorSummaryCard from "./DoctorSummaryCard";
 
@@ -32,9 +32,7 @@ const ScheduleTable = ({
             className="border-t theme-border align-top transition-colors theme-hover-surface"
           >
             <td className="sticky right-0 z-10 w-1/4 border-r theme-border px-5 py-5 theme-surface-90">
-              <DoctorSummaryCard
-                item={item}
-              />
+              <DoctorSummaryCard item={item} />
             </td>
 
             {WEEK_DAYS.map((day) => (

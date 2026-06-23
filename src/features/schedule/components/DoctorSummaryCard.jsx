@@ -1,4 +1,4 @@
-import { getShiftCount } from "../scheduleFormatters";
+import { getShiftCount } from "./scheduleFormatters";
 
 const DoctorSummaryCard = ({ item }) => (
   <div className="rounded-3xl border theme-border theme-surface p-4 shadow-sm">
