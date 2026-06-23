@@ -90,7 +90,6 @@ const authSlice = createSlice({
     updateProfileData: (state, action) => {
       const { name, image } = action.payload;
 
-      // 1. تحديث الاسم والصورة فقط داخل الـ State والمستند الداخلي user
       if (name !== undefined) {
         state.name = name;
         if (state.user) state.user.name = name;

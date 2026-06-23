@@ -24,6 +24,7 @@ const PatientRecordDetail = ({ patient, onBack }) => {
 
   // 💡 استدعاء السجل الطبي للمريض من الـ API باستخدام الـ uuid
   const { data: historyResponse, isLoading } = usePatientHistoryQuery(patient.uuid);
+  console.log(patient.uuid);
   
   // استخراج البيانات بناءً على هيكلية الريسبونس المرفق
   const patientInfo = historyResponse?.data?.patient_info || patient;
@@ -42,7 +43,7 @@ const PatientRecordDetail = ({ patient, onBack }) => {
       className="w-full "
     >
       {/* رأس الصفحة الثابت */}
-      <div className="sticky top-0 z-10 mb-6 -mx-3 px-3 py-4 backdrop-blur-md theme-surface-90 border-b theme-border -mx-2 -my-4 sm:-mx-4 md:-mx-8 lg:-mx-10">
+      <div className="sticky -top-4 z-10 mb-6 -mx-3 px-3 py-4 backdrop-blur-md theme-surface-90 border-b theme-border -mx-2 -my-4 sm:-mx-4 md:-mx-8 lg:-mx-10">
         <div className="max-w-4xl mx-auto flex items-center gap-3">
           <button
             onClick={handleBack}

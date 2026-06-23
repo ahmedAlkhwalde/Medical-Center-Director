@@ -7,8 +7,8 @@ import {
   closeMobileMenu,
   showSnackbar,
 } from "../features/uiSlice";
-import { logout } from "../features/auth/authSlice";
-import { useLogoutMutation } from "../service/authService";
+import { logout } from "../features/auth/store/authSlice";
+import { useLogoutMutation } from "../features/auth/service/authService";
 
 // MUI Icons
 import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
@@ -27,7 +27,7 @@ import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 import ChatRoundedIcon from "@mui/icons-material/ChatRounded";
 import PersonIcon from "@mui/icons-material/Person";
 
-import LogoutModal from "../pages/Login/Components/LogoutModal"; // استيراد المكون الجديد
+import LogoutModal from "../features/auth/Components/LogoutModal"; // استيراد المكون الجديد
 
 const navItems = [
   {

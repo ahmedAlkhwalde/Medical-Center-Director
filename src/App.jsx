@@ -1,10 +1,10 @@
 import "./App.css";
 import MainPage from "./pages/MainPage";
 import { Navigate, Route, Routes } from "react-router-dom";
-import LoginPage from "./pages/Login/LoginPage";
-import ForgotPasswordPage from "./pages/Login/ForgotPasswordPage";
-import VerifyResetCodePage from "./pages/Login/VerifyResetCodePage";
-import NewPasswordPage from "./pages/Login/NewPasswordPage";
+import LoginPage from "./features/auth/pages/LoginPage";
+import ForgotPasswordPage from "./features/auth/pages/ForgotPasswordPage";
+import VerifyResetCodePage from "./features/auth/pages/VerifyResetCodePage";
+import NewPasswordPage from "./features/auth/pages/NewPasswordPage";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { applyThemeMode } from "./app/theme";

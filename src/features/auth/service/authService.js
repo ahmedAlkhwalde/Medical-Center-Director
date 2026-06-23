@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
-import apiClient from "../config/apiClient";
+import apiClient from "../../../config/apiClient";
 import { useDispatch } from "react-redux";
-import { showSnackbar } from "../features/uiSlice";
+import { showSnackbar } from "../../uiSlice";
 import { useNavigate } from "react-router-dom";
 
 export const loginUser = async (payload) => {
