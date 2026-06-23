@@ -1,12 +1,10 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { showSnackbar } from "../../../features/uiSlice";
 import {
   useCreateSpecialtyMutation,
   useUpdateSpecialtyMutation,
 } from "../service/specialtiesService";
 
-// دالة مساعدة لتجهيز البيانات الابتدائية للنموذج
 const createInitialFormData = (editingItem) => ({
   name: editingItem?.name || "",
   price: editingItem?.price || "",
@@ -21,50 +19,19 @@ export const useSpecialtyForm = (editingItem, onClose) => {
   // طفرة إضافة اختصاص جديد
   const createSpecialtyMutation = useCreateSpecialtyMutation({
     onSuccess: () => {
-      dispatch(
-        showSnackbar({
-          message: "تمت إضافة الاختصاص بنجاح",
-          variant: "success",
-        })
-      );
       onClose();
-    },
-    onError: () => {
-      dispatch(
-        showSnackbar({
-          message: "تعذر إضافة الاختصاص حالياً، تحقق من الحقول",
-          variant: "error",
-        })
-      );
     },
   });
 
   // طفرة تحديث اختصاص حالي
   const updateSpecialtyMutation = useUpdateSpecialtyMutation({
     onSuccess: () => {
-      dispatch(
-        showSnackbar({
-          message: "تم تحديث الاختصاص بنجاح",
-          variant: "success",
-        })
-      );
       onClose();
-    },
-    onError: (e) => {
-      console.error(e);
-      dispatch(
-        showSnackbar({
-          message: "تعذر تحديث الاختصاص حالياً",
-          variant: "error",
-        })
-      );
     },
   });
 
-  // حساب حالة التحميل الإجمالية للعمليتين
   const isSubmitting = createSpecialtyMutation.isPending || updateSpecialtyMutation.isPending;
 
-  // التحقق من صحة المدخلات قبل الإرسال
   const validate = () => {
     const newErrors = {};
     if (!formData.name.trim()) newErrors.name = "اسم الاختصاص مطلوب";
@@ -79,7 +46,6 @@ export const useSpecialtyForm = (editingItem, onClose) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // معالجة إرسال النموذج للـ API
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!validate() || isSubmitting) return;
@@ -93,12 +59,10 @@ export const useSpecialtyForm = (editingItem, onClose) => {
     if (editingItem) {
       const targetId = editingItem.uuid;
       if (!targetId) {
-        dispatch(
-          showSnackbar({
-            message: "معرّف الاختصاص غير متوفر للتعديل",
-            variant: "error",
-          })
-        );
+        // فحص محلي لحالة عدم توفر المعرف
+        import("../../../features/uiSlice").then(({ showSnackbar }) => {
+          dispatch(showSnackbar({ message: "معرّف الاختصاص غير متوفر للتعديل", variant: "error" }));
+        });
         return;
       }
       updateSpecialtyMutation.mutate({ uuid: targetId, payload });
@@ -108,7 +72,6 @@ export const useSpecialtyForm = (editingItem, onClose) => {
     createSpecialtyMutation.mutate(payload);
   };
 
-  // دالة موحدة لتحديث قيم الحقول تلقائياً وبسهولة
   const handleFieldChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };

@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useDispatch } from "react-redux";
 import apiClient from "../../../config/apiClient";
+import { showSnackbar } from "../../../features/uiSlice"; // تأكد من صحة المسار لديك
 
 export const SPECIALTIES_QUERY_KEY = ["specialties"];
 const DEFAULT_STALE_TIME = 60 * 1000;
@@ -139,9 +141,10 @@ export const deleteSpecialty = async (uuid) => {
   return response.data;
 };
 
-// 1. خطاف إضافة اختصاص جديد (يعتمد بالكامل على استجابة السيرفر وتحديث الكاش)
+// 1. خطاف إضافة اختصاص جديد
 export const useCreateSpecialtyMutation = (options = {}) => {
   const queryClient = useQueryClient();
+  const dispatch = useDispatch();
 
   return useMutation({
     mutationFn: createSpecialty,
@@ -154,9 +157,19 @@ export const useCreateSpecialtyMutation = (options = {}) => {
       });
 
       queryClient.invalidateQueries({ queryKey: SPECIALTIES_QUERY_KEY });
+
+      // عرض رسالة السيرفر للنجاح
+      const successMessage = "تمت إضافة الاختصاص بنجاح";
+      dispatch(showSnackbar({ message: successMessage, variant: "success" }));
+
       options.onSuccess?.(data, variables, context);
     },
     onError: (error, variables, context) => {
+      // عرض رسالة السيرفر للخطأ
+      const serverMessage = error?.response?.data?.message;
+      const errorMessage = "تعذر إضافة الاختصاص حالياً، تحقق من الحقول";
+      dispatch(showSnackbar({ message: errorMessage, variant: "error" }));
+
       options.onError?.(error, variables, context);
     },
   });
@@ -165,6 +178,7 @@ export const useCreateSpecialtyMutation = (options = {}) => {
 // 2. خطاف تعديل الاختصاص
 export const useUpdateSpecialtyMutation = (options = {}) => {
   const queryClient = useQueryClient();
+  const dispatch = useDispatch();
 
   return useMutation({
     mutationFn: updateSpecialty,
@@ -177,9 +191,19 @@ export const useUpdateSpecialtyMutation = (options = {}) => {
         );
       }
       queryClient.invalidateQueries({ queryKey: SPECIALTIES_QUERY_KEY });
+
+      // عرض رسالة السيرفر للنجاح
+      const successMessage = "تم تحديث الاختصاص بنجاح";
+      dispatch(showSnackbar({ message: successMessage, variant: "success" }));
+
       options.onSuccess?.(data, variables, context);
     },
     onError: (error, variables, context) => {
+      // عرض رسالة السيرفر للخطأ
+      const serverMessage = error?.response?.data?.message;
+      const errorMessage = "تعذر تحديث الاختصاص حالياً";
+      dispatch(showSnackbar({ message: errorMessage, variant: "error" }));
+
       options.onError?.(error, variables, context);
     },
   });
@@ -188,6 +212,7 @@ export const useUpdateSpecialtyMutation = (options = {}) => {
 // 3. خطاف حذف الاختصاص
 export const useDeleteSpecialtyMutation = (options = {}) => {
   const queryClient = useQueryClient();
+  const dispatch = useDispatch();
 
   return useMutation({
     mutationFn: deleteSpecialty,
@@ -200,12 +225,25 @@ export const useDeleteSpecialtyMutation = (options = {}) => {
         old.filter((item) => item.uuid !== uuid)
       );
 
-      return { previous };
+      const contextResult = await options.onMutate?.(uuid);
+      return { previous, ...contextResult };
+    },
+    onSuccess: (data, variables, context) => {
+      // عرض رسالة السيرفر للنجاح عند الحذف
+      const successMessage = "تم حذف الاختصاص بنجاح";
+      dispatch(showSnackbar({ message: successMessage, variant: "success" }));
+
+      options.onSuccess?.(data, variables, context);
     },
     onError: (error, variables, context) => {
       if (context?.previous) {
         queryClient.setQueryData(SPECIALTIES_QUERY_KEY, context.previous);
       }
+      // عرض رسالة السيرفر للخطأ عند الحذف
+      const serverMessage = error?.response?.data?.message;
+      const errorMessage = "تعذر حذف الاختصاص حالياً";
+      dispatch(showSnackbar({ message: errorMessage, variant: "error" }));
+
       options.onError?.(error, variables, context);
     },
     onSettled: (data, error, variables, context) => {
