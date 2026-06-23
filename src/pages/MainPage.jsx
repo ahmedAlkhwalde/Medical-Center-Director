@@ -1,8 +1,8 @@
 import { Routes, Route } from "react-router-dom";
 import Layout from "../components/Layout";
 import SpecialtiesPage from "../features/specialties/pages/SpecialtiesPage";
-import DoctorsPage from "./doctors/DoctorsPage";
-import DoctorDetailPage from "./doctors/DoctorDetailPage";
+import DoctorsPage from "../features/doctors/pages/DoctorsPage";
+import DoctorDetailPage from "../features/doctors/pages/DoctorDetailPage";
 import ClinicsPage from "./clinics/ClinicsPage";
 import MapPage from "./map/MapPage";
 import SecretariesPage from "./secretary/SecretariesPage";
