@@ -10,7 +10,7 @@ import secretariesReducer from "../features/secretaries/store/secretariesSlice";
 import patientsReducer from "../features/patients/store/patientsSlice";
 import scheduleReducer from "../features/schedule/store/scheduleSlice";
 import chatReducer from "../features/chat/chatSlice";
-import profileReducer from "../features/profile/profileSlice";
+import profileReducer from "../features/profile/store/profileSlice";
 
 export const store = configureStore({
   reducer: {

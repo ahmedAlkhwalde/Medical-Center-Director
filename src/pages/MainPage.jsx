@@ -9,7 +9,7 @@ import SecretariesPage from "../features/secretaries/pages/SecretariesPage";
 import PatientsRecordsPage from "../features/patients/pages/PatientsRecordsPage";
 import DashboardPage from "../features/dashboard/pages/DashboardPage";
 import SchedulePage from "../features/schedule/pages/SchedulePage";
-import ProfilePage from "./profile/ProfilePage";
+import ProfilePage from "../features/profile/pages/ProfilePage";
 import ChatList from "../pages/conversation/ChatList";
 import Conversation from "../pages/conversation/Conversation";
 import NotificationPage from "../pages/notification/NotificationPage";
