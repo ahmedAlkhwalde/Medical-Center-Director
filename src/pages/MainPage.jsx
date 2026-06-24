@@ -12,7 +12,7 @@ import SchedulePage from "../features/schedule/pages/SchedulePage";
 import ProfilePage from "../features/profile/pages/ProfilePage";
 import ChatList from "../features/chat/pages/ChatList";
 import Conversation from "../features/chat/pages/Conversation";
-import NotificationPage from "../pages/notification/NotificationPage";
+import NotificationPage from "../features/notification/pages/NotificationPage";
 
 export default function MainPage() {
   return (

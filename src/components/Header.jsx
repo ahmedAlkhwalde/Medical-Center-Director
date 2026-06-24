@@ -13,8 +13,8 @@ import {
 } from "@mui/icons-material";
 import { toggleMobileMenu } from "../features/uiSlice";
 import { useNavigate } from "react-router-dom";
-import SearchResultsDialog from "./SearchDialog";
-import notificationService from "../service/notificationChatService"
+import SearchResultsDialog from "../features/search/pages/SearchDialog";
+import notificationService from "../features/notification/service/notificationChatService";
 
 const Header = ({ isDark, onToggleTheme }) => {
   const navigate = useNavigate();

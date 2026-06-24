@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import apiClient from "../config/apiClient";
-import { messaging, requestForToken } from "../../firebase";
+import apiClient from "../../../config/apiClient";
+import { messaging, requestForToken } from "../../../../firebase";
 import { onMessage } from "firebase/messaging";
 
 export const NOTIFICATION_KEYS = {
