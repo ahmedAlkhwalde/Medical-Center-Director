@@ -1,21 +1,8 @@
-import { useState } from "react";
 import { motion as Motion, AnimatePresence } from "framer-motion";
 import { Close } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
-import { closeModal } from "../../../features/secretaries/secretariesSlice";
-import {
-  useCreateSecretaryMutation,
-  useUpdateSecretaryMutation,
-} from "../../../service/secretariesService";
-
-const createInitialFormData = (editingItem) => ({
-  name: editingItem?.name || "",
-  phone: editingItem?.phone || "",
-  email: editingItem?.email || "",
-  salary: editingItem?.salary ?? "",
-});
-
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import { closeModal } from "../store/secretariesSlice";
+import { useSecretaryForm } from "../hooks/useSecretaryForm"; // تأكد من صحة مسار الهوك لديك
 
 const AddSecretaryModal = () => {
   const { isModalOpen, editingItem } = useSelector((state) => state.secretaries);
@@ -35,83 +22,17 @@ const AddSecretaryModal = () => {
 };
 
 const ModalContent = ({ editingItem, onClose }) => {
-  const [formData, setFormData] = useState(() => createInitialFormData(editingItem));
-  const [errors, setErrors] = useState({});
-
-  const createSecretaryMutation = useCreateSecretaryMutation({
-    onSuccess: () => onClose(),
-  });
-  
-  const updateSecretaryMutation = useUpdateSecretaryMutation({
-    onSuccess: () => onClose(),
-  });
-
-  const isSubmitting = createSecretaryMutation.isPending || updateSecretaryMutation.isPending;
-
-  const validate = () => {
-    const nextErrors = {};
-    if (!formData.name.trim()) nextErrors.name = "اسم السكرتير مطلوب";
-    if (!formData.phone.trim()) nextErrors.phone = "الرقم مطلوب";
-    if (!emailPattern.test(formData.email.trim())) nextErrors.email = "البريد الإلكتروني غير صالح";
-    if (!formData.salary || Number(formData.salary) <= 0) nextErrors.salary = "الراتب يجب أن يكون أكبر من 0";
-
-    setErrors(nextErrors);
-    return Object.keys(nextErrors).length === 0;
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    if (!validate() || isSubmitting) return;
-
-    // البيانات الأساسية المنظفة من الفورم
-    const currentName = formData.name.trim();
-    const currentEmail = formData.email.trim();
-    const currentPhone = formData.phone.trim();
-    const currentSalary = Number(formData.salary) || 0;
-
-    // حالة التعديل: إرسال المتغيرات فقط (Diff Check)
-    if (editingItem) {
-      const changedPayload = {};
-
-      if (currentName !== editingItem.name) {
-        changedPayload.name = currentName;
-      }
-      if (currentEmail !== editingItem.email) {
-        changedPayload.email = currentEmail;
-      }
-      // المقارنة مع الحقل القادم الموحد في الفرونت إند (phone)
-      if (currentPhone !== editingItem.phone) {
-        changedPayload.number = currentPhone; // الباك إند يتوقع اسم number
-      }
-      if (currentSalary !== editingItem.salary) {
-        changedPayload.salary = currentSalary;
-      }
-
-      // 💡 إذا لم يقم المستخدم بتعديل أي شيء مطلقاً وضغط حفظ، نغلق المودال مباشرة دون إرهاق السيرفر بطلب فارغ
-      if (Object.keys(changedPayload).length === 0) {
-        onClose();
-        return;
-      }
-
-      updateSecretaryMutation.mutate({
-        uuid: editingItem.uuid,
-        payload: changedPayload,
-      });
-      return;
-    }
-
-    // حالة الإضافة الجديدة: نرسل الـ body كاملاً وبشكل طبيعي
-    const fullPayload = {
-      name: currentName,
-      email: currentEmail,
-      number: currentPhone,
-      salary: currentSalary,
-    };
-    createSecretaryMutation.mutate(fullPayload);
-  };
+  const {
+    formData,
+    errors,
+    isSubmitting,
+    handleSubmit,
+    handleFieldChange,
+  } = useSecretaryForm(editingItem, onClose);
 
   return (
     <div className="fixed inset-0 z-10000 flex items-center justify-center p-3 sm:p-4">
+      {/* الخلفية المعتمة */}
       <Motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -119,6 +40,8 @@ const ModalContent = ({ editingItem, onClose }) => {
         onClick={() => !isSubmitting && onClose()}
         className="absolute inset-0 theme-overlay backdrop-blur-sm"
       />
+      
+      {/* نافذة المودال */}
       <Motion.div
         initial={{ scale: 0.95, opacity: 0, y: 15 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -146,7 +69,7 @@ const ModalContent = ({ editingItem, onClose }) => {
             error={errors.name}
             placeholder="مثال: سارة محمود"
             disabled={isSubmitting}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            onChange={(e) => handleFieldChange("name", e.target.value)}
           />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -157,7 +80,7 @@ const ModalContent = ({ editingItem, onClose }) => {
               error={errors.phone}
               placeholder="مثال: 0933-111-222"
               disabled={isSubmitting}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              onChange={(e) => handleFieldChange("phone", e.target.value)}
             />
             <InputField
               label="البريد الإلكتروني"
@@ -166,7 +89,7 @@ const ModalContent = ({ editingItem, onClose }) => {
               error={errors.email}
               placeholder="مثال: name@example.com"
               disabled={isSubmitting}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              onChange={(e) => handleFieldChange("email", e.target.value)}
             />
           </div>
 
@@ -180,9 +103,10 @@ const ModalContent = ({ editingItem, onClose }) => {
             error={errors.salary}
             placeholder="مثال: 8500000"
             disabled={isSubmitting}
-            onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
+            onChange={(e) => handleFieldChange("salary", e.target.value)}
           />
 
+          {/* أزرار التحكم والإرسال */}
           <div className="flex gap-3 pt-4">
             <button
               type="submit"

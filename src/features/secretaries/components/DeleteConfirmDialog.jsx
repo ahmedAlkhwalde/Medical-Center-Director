@@ -1,51 +1,26 @@
 import { motion as Motion, AnimatePresence } from "framer-motion";
-import { useDispatch, useSelector } from "react-redux";
-import { closeDeleteDialog } from "../../../features/secretaries/secretariesSlice";
-import { useUpdateSecretaryStatusMutation } from "../../../service/secretariesService";
+import { useDeleteConfirmDialog } from "../hooks/useDeleteConfirmDialog"; // اضبط مسار الهوك حسب مشروعك
 
 const DeleteConfirmDialog = () => {
-  const { isDeleteDialogOpen, itemToDelete } = useSelector(
-    (state) => state.secretaries,
-  );
-  const dispatch = useDispatch();
-
-  // استدعاء الهوك الموحد
-  const statusMutation = useUpdateSecretaryStatusMutation({
-    onSuccess: () => {
-      // 💡 الحل الجذري: بمجرد نجاح العملية في السيرفر، نغلق الـ Dialog فوراً ليختفي من الشاشة
-      dispatch(closeDeleteDialog());
-    }
-  });
-
-  const isPending = statusMutation.isPending;
-  const targetUuid = itemToDelete?.uuid || itemToDelete?.id;
-  
-  // قراءة الحالة الممررة عند الضغط على الزر في الجدول
-  const isActive = Boolean(itemToDelete?.isActive);
-  const selectedItemName = itemToDelete?.name;
-
-  const handleToggleActive = () => {
-    if (!targetUuid || isPending) return;
-
-    // إرسال طلب عكس الحالة الحالية الحية للسيرفر (0 للمعطل و 1 للمفعل)
-    statusMutation.mutate({
-      uuid: targetUuid,
-      active: isActive ? 0 : 1
-    });
-  };
+  const {
+    isDeleteDialogOpen,
+    isActive,
+    selectedItemName,
+    isPending,
+    handleToggleActive,
+    handleClose,
+  } = useDeleteConfirmDialog();
 
   return (
     <AnimatePresence>
       {isDeleteDialogOpen && (
-        <div
-          className="fixed inset-0 z-[10000] flex items-center justify-center p-4 overflow-x-hidden overflow-y-auto"
-        >
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 overflow-x-hidden overflow-y-auto">
           {/* الخلفية الموضببة الهادئة */}
           <Motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => !isPending && dispatch(closeDeleteDialog())}
+            onClick={() => !isPending && handleClose()}
             className="fixed inset-0 theme-overlay backdrop-blur-md"
           />
 
@@ -58,11 +33,13 @@ const DeleteConfirmDialog = () => {
             className="theme-surface relative z-10 w-full max-w-sm rounded-3xl p-6 text-center shadow-2xl border theme-border sm:p-8"
           >
             {/* الأيقونة تتحدد بناءً على حالة العنصر المفتوح حالياً */}
-            <div className={`mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full text-4xl border ${
-              isActive 
-                ? "bg-amber-500/10 text-amber-500 border-amber-500/20" 
-                : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
-            }`}>
+            <div
+              className={`mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full text-4xl border ${
+                isActive
+                  ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                  : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+              }`}
+            >
               {isActive ? "⚠️" : "🔒"}
             </div>
 
@@ -70,13 +47,15 @@ const DeleteConfirmDialog = () => {
             <h3 className="text-2xl font-black tracking-tight theme-text">
               {isActive ? "تعطيل الحساب؟" : "تفعيل الحساب؟"}
             </h3>
-            
+
             <p className="mt-3 text-sm leading-relaxed theme-text-muted px-2">
               أنت على وشك تغيير حالة حساب السكرتير{" "}
               <span className="font-bold theme-text-accent block text-base mt-1">
                 {selectedItemName || "هذا السجل"}
               </span>
-              سيؤدي هذا إلى {isActive ? "حظر دخوله المؤقت للنظام" : "السماح له بالوصول للوحة التحكم"}.
+              سيؤدي هذا إلى{" "}
+              {isActive ? "حظر دخوله المؤقت للنظام" : "السماح له بالوصول للوحة التحكم"}
+              .
             </p>
 
             {/* أزرار التحكم الفورية */}
@@ -93,9 +72,24 @@ const DeleteConfirmDialog = () => {
               >
                 {isPending ? (
                   <>
-                    <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    <svg
+                      className="animate-spin h-5 w-5 text-white"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
                     </svg>
                     <span>جاري الحفظ...</span>
                   </>
@@ -109,7 +103,7 @@ const DeleteConfirmDialog = () => {
               <button
                 type="button"
                 disabled={isPending}
-                onClick={() => dispatch(closeDeleteDialog())}
+                onClick={handleClose}
                 className="flex-1 cursor-pointer rounded-xl py-3.5 font-bold border theme-border theme-bg theme-text hover:bg-black/5 dark:hover:bg-white/5 transition-colors duration-200 disabled:opacity-40"
               >
                 إلغاء

@@ -5,7 +5,7 @@ import DoctorsPage from "../features/doctors/pages/DoctorsPage";
 import DoctorDetailPage from "../features/doctors/pages/DoctorDetailPage";
 import ClinicsPage from "../features/clinics/pages/ClinicsPage";
 import MapPage from "./map/MapPage";
-import SecretariesPage from "./secretary/SecretariesPage";
+import SecretariesPage from "../features/secretaries/pages/SecretariesPage";
 import PatientsRecordsPage from "./patients/PatientsRecordsPage";
 import DashboardPage from "../features/dashboard/pages/DashboardPage";
 import SchedulePage from "../features/schedule/pages/SchedulePage";

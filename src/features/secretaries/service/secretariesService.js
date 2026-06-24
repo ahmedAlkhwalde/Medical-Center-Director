@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import apiClient from "../config/apiClient";
-import { store } from "../app/store";
-import { showSnackbar } from "../features/uiSlice";
+import apiClient from "../../../config/apiClient";
+import { store } from "../../../app/store";
+import { showSnackbar } from "../../uiSlice";
 
 export const SECRETARIES_QUERY_KEY = ["secretaries"];
 const DEFAULT_STALE_TIME = 60 * 1000;

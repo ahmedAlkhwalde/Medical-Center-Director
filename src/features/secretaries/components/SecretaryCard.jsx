@@ -9,11 +9,8 @@ import {
   ToggleOnOutlined,
 } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
-import {
-  openModal,
-  confirmDelete,
-} from "../../../features/secretaries/secretariesSlice";
-import { formatSalary } from "../secretaryFormatters";
+import { openModal, confirmDelete } from "../store/secretariesSlice";
+import { formatSalary } from "../components/secretaryFormatters";
 
 const SecretaryCard = ({ data, index, dataScrollId }) => {
   const dispatch = useDispatch();
