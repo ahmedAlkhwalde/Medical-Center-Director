@@ -9,7 +9,7 @@ import {
 import { getAuth, signInAnonymously } from 'firebase/auth';
 import { format } from 'date-fns';
 // import apiClient from "./config/apiClient";
-import chatService from "./src/service/chatService"; 
+import chatService from "./src/features/chat/service/chatService"; 
 
 const firebaseConfig = {
   apiKey: "AIzaSyDC_PG6WCHGZpxFlQTRnysaivEI_szYslg",

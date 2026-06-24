@@ -5,11 +5,11 @@ import authReducer from "../features/auth/store/authSlice";
 import specialtiesReducer from "../features/specialties/store/specialtiesSlice";
 import doctorsReducer from "../features/doctors/store/doctorsSlice";
 import clinicsReducer from "../features/clinics/store/clinicsSlice";
-import mapReducer from "../features/map/mapSlice";
+import mapReducer from "../features/map/store/mapSlice";
 import secretariesReducer from "../features/secretaries/store/secretariesSlice";
 import patientsReducer from "../features/patients/store/patientsSlice";
 import scheduleReducer from "../features/schedule/store/scheduleSlice";
-import chatReducer from "../features/chat/chatSlice";
+import chatReducer from "../features/chat/store/chatSlice";
 import profileReducer from "../features/profile/store/profileSlice";
 
 export const store = configureStore({

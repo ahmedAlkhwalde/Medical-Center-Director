@@ -2,8 +2,8 @@ import { motion as Motion } from "framer-motion";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { PlaceOutlined } from "@mui/icons-material";
-import MapEditor from "./components/MapEditor";
-import { loadStoredLocation } from "../../features/map/mapSlice";
+import MapEditor from "../components/MapEditor";
+import { loadStoredLocation } from "../store/mapSlice";
 
 const MapPage = () => {
   const dispatch = useDispatch();
@@ -24,7 +24,9 @@ const MapPage = () => {
             <PlaceOutlined />
           </div>
           <div>
-            <h1 className="text-2xl font-bold theme-text">قسم تحديد موقع المركز</h1>
+            <h1 className="text-2xl font-bold theme-text">
+              قسم تحديد موقع المركز
+            </h1>
             <p className="mt-1 text-sm theme-text-muted">
               صفحة مستقلة لحفظ وتعديل موقع المركز على الخريطة فقط
             </p>

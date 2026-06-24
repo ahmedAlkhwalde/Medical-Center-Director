@@ -21,7 +21,7 @@ import {
   resetDraftToSaved,
   saveLocation,
   setDraftLocation,
-} from "../../../features/map/mapSlice";
+} from "../store/mapSlice";
 
 if (typeof window !== "undefined") {
   delete L.Icon.Default.prototype._getIconUrl;

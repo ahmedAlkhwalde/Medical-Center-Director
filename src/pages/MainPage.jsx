@@ -4,14 +4,14 @@ import SpecialtiesPage from "../features/specialties/pages/SpecialtiesPage";
 import DoctorsPage from "../features/doctors/pages/DoctorsPage";
 import DoctorDetailPage from "../features/doctors/pages/DoctorDetailPage";
 import ClinicsPage from "../features/clinics/pages/ClinicsPage";
-import MapPage from "./map/MapPage";
+import MapPage from "../features/map/pages/MapPage";
 import SecretariesPage from "../features/secretaries/pages/SecretariesPage";
 import PatientsRecordsPage from "../features/patients/pages/PatientsRecordsPage";
 import DashboardPage from "../features/dashboard/pages/DashboardPage";
 import SchedulePage from "../features/schedule/pages/SchedulePage";
 import ProfilePage from "../features/profile/pages/ProfilePage";
-import ChatList from "../pages/conversation/ChatList";
-import Conversation from "../pages/conversation/Conversation";
+import ChatList from "../features/chat/pages/ChatList";
+import Conversation from "../features/chat/pages/Conversation";
 import NotificationPage from "../pages/notification/NotificationPage";
 
 export default function MainPage() {
