@@ -60,6 +60,8 @@ export const useSchedulesQuery = (specializationId) => {
     queryFn: async () => {
       const params = specializationId ? { specialization_id: specializationId } : {};
       const response = await apiClient.get("admin/schedules", { params });
+
+      console.log("Schedules data:", specializationId, response.data);
       return response.data;
     },
     // تمرير البيانات مباشرة والدالة ستتولى استخراج المصفوفة بأمان

@@ -13,6 +13,7 @@ export const useSchedule = () => {
   // جلب الاختصاصات من الخادم
   const { data: specialties = [] } = useSpecialtiesQuery();
 
+  console.log("id scedule",selectedSpecialtyId);
   // استدعاء جداول الدوام بناءً على الاختصاص المختار
   const {
     data: schedules = [],
