@@ -77,8 +77,8 @@ const ScheduleFilters = ({
                 </option>
                 {specialties.map((spec) => (
                   <option 
-                    key={spec.id} 
-                    value={spec.id}
+                    key={spec.legacyId} 
+                    value={spec.legacyId}
                     className="theme-surface theme-text"
                   >
                     {spec.name}
