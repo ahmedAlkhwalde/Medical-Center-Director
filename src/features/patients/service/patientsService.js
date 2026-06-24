@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import apiClient from "../config/apiClient"; // نسخة الـ axios المهيأة بمشروعك
+import apiClient from "../../../config/apiClient"; // نسخة الـ axios المهيأة بمشروعك
 
 // هوك البحث عن المريض بالاسم أو الهاتف
 export const usePatientSearchQuery = (query) => {

@@ -1,68 +1,38 @@
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { motion as Motion, AnimatePresence } from "framer-motion";
 import { Search, SearchOff } from "@mui/icons-material";
-import { CircularProgress } from "@mui/material"; 
-import { clearSelectedPatient } from "../../features/patients/patientsSlice";
-import { usePatientSearchQuery } from "../../service/patientsService"; 
-import PatientCard from "./components/PatientCard";
-import PatientRecordDetail from "./components/PatientRecordDetail";
+import { CircularProgress } from "@mui/material";
+import { usePatientSearch } from "../hooks/usePatientSearch"; // استيراد الهوك
+import PatientCard from "../components/PatientCard";
+import PatientRecordDetail from "./PatientRecordDetail";
 
 const PatientsRecordsPage = () => {
-  const dispatch = useDispatch();
-  const { selectedPatient } = useSelector((state) => state.patients);
-  const [localSearchQuery, setLocalSearchQuery] = useState("");
-  const [showSearchResults, setShowSearchResults] = useState(false);
-
-  // استدعاء بيانات البحث من TanStack Query
-  const { data: searchResponse, isLoading, isFetching } = usePatientSearchQuery(localSearchQuery);
-  const searchResults = searchResponse?.data || [];
-
-  useEffect(() => {
-    dispatch(clearSelectedPatient());
-    return () => {
-      dispatch(clearSelectedPatient());
-    };
-  }, [dispatch]);
-
-  const handleSearchChange = (e) => {
-    const query = e.target.value;
-    setLocalSearchQuery(query);
-
-    if (query.trim()) {
-      setShowSearchResults(true);
-    } else {
-      setShowSearchResults(false);
-    }
-  };
-
-  const handlePatientSelect = () => {
-    setShowSearchResults(false);
-  };
-
-  const handleBackToSearch = () => {
-    setShowSearchResults(true);
-  };
-
-  const handleResetSearch = () => {
-    setLocalSearchQuery("");
-    setShowSearchResults(false);
-  };
+  const {
+    localSearchQuery,
+    showSearchResults,
+    searchResults,
+    isLoading,
+    isFetching,
+    selectedPatient,
+    handleSearchChange,
+    handlePatientSelect,
+    handleBackToSearch,
+    handleResetSearch,
+  } = usePatientSearch();
 
   if (selectedPatient) {
-  return (
-    <PatientRecordDetail
-      patient={selectedPatient} // يمرر كائن المريض الذي يحتوي على الـ uuid المسترجع من كرت المريض بنجاح
-      onBack={handleBackToSearch}
-    />
-  );
-}
+    return (
+      <PatientRecordDetail
+        patient={selectedPatient}
+        onBack={handleBackToSearch}
+      />
+    );
+  }
 
   return (
     <div className="min-w-full min-h-screen">
       <div className="-mx-3 -my-4 sm:-mx-4 md:-mx-8 lg:-mx-10">
         
-        {/* قسم واجهة البحث الموحد (يتغير شكله ديناميكياً لضمان ثبات الـ Focus) */}
+        {/* قسم واجهة البحث الموحد */}
         <div 
           className={
             showSearchResults 
@@ -72,7 +42,6 @@ const PatientsRecordsPage = () => {
         >
           <div className="w-full max-w-4xl mx-auto flex flex-col items-center">
             
-            {/* 1. عناصر الصفحة الفارغة الابتدائية (تظهر فقط عند عدم وجود بحث) */}
             {!showSearchResults && (
               <div className="flex flex-col items-center w-full">
                 <Motion.div
@@ -98,7 +67,6 @@ const PatientsRecordsPage = () => {
               </div>
             )}
 
-            {/* 2. شريط التحكم العلوي لنتائج البحث (يظهر فقط عند البدء في الكتابة) */}
             {showSearchResults && (
               <div className="w-full flex items-center gap-2 mb-4 animate-fadeIn">
                 <button
@@ -114,7 +82,6 @@ const PatientsRecordsPage = () => {
               </div>
             )}
 
-            {/* 3. حقل الإدخال الثابت (موجود دائماً في الـ DOM لتفادي خسارة الـ Focus) */}
             <div 
               className={`w-full rounded-3xl p-1 theme-gradient-border shadow-lg transition-all duration-300 ${
                 !showSearchResults ? "max-w-md" : "max-w-full"
@@ -139,14 +106,13 @@ const PatientsRecordsPage = () => {
           </div>
         </div>
 
-        {/* لوحة عرض نتائج البحث الفعّالة (أسفل شريط البحث الثابت) */}
+        {/* لوحة عرض نتائج البحث */}
         {showSearchResults && (
           <Motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            {/* قائمة عرض الكروت أو التنبيه بعدم وجود داتا */}
             {searchResults.length > 0 ? (
               <div className="px-3 sm:px-4 md:px-8 lg:px-10 space-y-2">
                 <AnimatePresence mode="popLayout">
