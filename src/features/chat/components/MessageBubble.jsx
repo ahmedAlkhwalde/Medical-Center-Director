@@ -1,4 +1,4 @@
-import { Check, CheckCheck, FileText } from "lucide-react";
+import { Check, CheckCheck, FileText, Edit2, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import AudioPlayer from "./AudioPlayer";
 import {host_chat} from "../../../config/apiClient";

@@ -38,6 +38,26 @@ export const useChatView = () => {
   const c = useChatController(firebaseRoomKey || "placeholder_room", userId);
   const messagesEndRef = useRef(null);
 
+
+// تأكد من أن audioState يحتوي على هذه الدوال
+const audioState = {
+  playingMessageId,
+  audioProgress,
+  audioDuration,
+  loadingAudioId,
+  globalAudioPlayer: null, // لم نعد نستخدم global
+  formatTime: (timeInSeconds) => {
+    if (!isFinite(timeInSeconds) || isNaN(timeInSeconds) || timeInSeconds < 0) return "0:00";
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = Math.floor(timeInSeconds % 60);
+    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+  },
+  setPlayingMessageId,
+  setAudioProgress,
+  setAudioDuration,
+  setLoadingAudioId,
+};
+
   // جلب أو إنشاء الغرفة
   useEffect(() => {
     if (targetId && userId) {
