@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect,useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Navigate, Route, Routes } from "react-router-dom";
 import "./App.css";
@@ -21,6 +21,7 @@ import ProfilePage from "./features/profile/pages/ProfilePage";
 import ChatList from "./features/chat/pages/ChatList";
 import Conversation from "./features/chat/pages/Conversation";
 import NotificationPage from "./features/notification/pages/NotificationPage";
+import notificationChatService from "./features/notification/service/notificationChatService";
 
 // صفحات المصادقة
 import LoginPage from "./features/auth/pages/LoginPage";
@@ -34,10 +35,19 @@ function App() {
   const snackbar = useSelector((state) => state.ui.snackbar);
   const dispatch = useDispatch();
   const isAuthed = Boolean(token);
+  const isTokenProcessed = useRef(false);
 
   useEffect(() => {
     applyThemeMode(darkMode);
   }, [darkMode]);
+
+  useEffect(() => {
+    notificationChatService.initializeFCM(isTokenProcessed);
+    const unsubscribe = notificationChatService.listenToForegroundMessages();
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, []);
 
   return (
     <div className="App">
