@@ -42,12 +42,22 @@ function App() {
   }, [darkMode]);
 
   useEffect(() => {
-    notificationChatService.initializeFCM(isTokenProcessed);
-    const unsubscribe = notificationChatService.listenToForegroundMessages();
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
-  }, []);
+    if (token) {
+      const timer = setTimeout(() => {
+        notificationChatService.initializeFCM(isTokenProcessed);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    if (token) {
+      const unsubscribe = notificationChatService.listenToForegroundMessages();
+      return () => {
+        if (unsubscribe) unsubscribe();
+      };
+    }
+  }, [token]);
 
   return (
     <div className="App">
