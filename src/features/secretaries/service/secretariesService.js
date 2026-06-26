@@ -102,16 +102,8 @@ export const useCreateSecretaryMutation = (options = {}) => {
       options.onSuccess?.(data, variables, context);
     },
     onError: (error, variables, context) => {
-      if (error?.response?.status !== 422) {
-        store.dispatch(
-          showSnackbar({ message: "تمت إضافة السكرتير بنجاح", variant: "success" })
-        );
-        options.onSuccess?.({}, variables, context);
-        return;
-      }
-      
       store.dispatch(
-        showSnackbar({ message: "البيانات المدخلة غير صالحة أو البريد الإلكتروني مستخدم مسبقاً", variant: "error" })
+        showSnackbar({ message: error.response.data.message || "تعذر إضافة السكرتاريا حاليا, جرب لاحقاً", variant: "error" })
       );
       options.onError?.(error, variables, context);
     },
@@ -135,16 +127,8 @@ export const useUpdateSecretaryMutation = (options = {}) => {
       options.onSuccess?.(data, variables, context);
     },
     onError: (error, variables, context) => {
-      if (error?.response?.status !== 422) {
-        store.dispatch(
-          showSnackbar({ message: "تم تحديث بيانات السكرتير بنجاح", variant: "success" })
-        );
-        options.onSuccess?.({}, variables, context);
-        return;
-      }
-
       store.dispatch(
-        showSnackbar({ message: "البيانات المحدثة غير صالحة أو البريد الإلكتروني مستخدم مسبقاً", variant: "error" })
+        showSnackbar({ message: error.response.data.message || "البيانات المحدثة غير صالحة أو البريد الإلكتروني مستخدم مسبقاً", variant: "error" })
       );
       options.onError?.(error, variables, context);
     },

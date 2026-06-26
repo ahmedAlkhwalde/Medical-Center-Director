@@ -32,6 +32,7 @@ export const useCreateDoctorMutation = () => {
   return useMutation({
     mutationFn: async (payload) => {
       const response = await apiClient.post("/admin/doctors", payload);
+      
       return response.data;
     },
     onSuccess: (data) => {
@@ -42,7 +43,7 @@ export const useCreateDoctorMutation = () => {
       dispatch(showSnackbar({ message: successMessage, variant: "success" }));
     },
     onError: (error) => {
-      const errorMessage = "تعذر إضافة الطبيب.";
+      const errorMessage = error.response.data.message || "تعذر إضافة الطبيب.";
       dispatch(showSnackbar({ message: errorMessage, variant: "error" }));
     },
   });
@@ -70,7 +71,7 @@ export const useUpdateDoctorMutation = () => {
       dispatch(showSnackbar({ message: successMessage, variant: "success" }));
     },
     onError: (error) => {
-      const errorMessage =  "حدث خطأ أثناء التحديث.";
+      const errorMessage = error.response.data.message || "حدث خطأ أثناء التحديث.";
       dispatch(showSnackbar({ message: errorMessage, variant: "error" }));
     },
   });
