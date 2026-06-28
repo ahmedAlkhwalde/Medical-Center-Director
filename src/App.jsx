@@ -1,13 +1,12 @@
 import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import "./App.css";
 import { applyThemeMode } from "./app/theme";
 import AppSnackbar from "./components/AppSnackbar";
 import Layout from "./components/Layout";
 import { hideSnackbar } from "./features/uiSlice";
 
-// استيراد جميع الصفحات (نفس ما كان في MainPage)
 import DashboardPage from "./features/dashboard/pages/DashboardPage";
 import SchedulePage from "./features/schedule/pages/SchedulePage";
 import SpecialtiesPage from "./features/specialties/pages/SpecialtiesPage";
@@ -24,11 +23,61 @@ import NotificationPage from "./features/notification/pages/NotificationPage";
 import notificationChatService from "./features/notification/service/notificationChatService";
 import NotFoundPage from "./components/NotFoundPage";
 
-// صفحات المصادقة
 import LoginPage from "./features/auth/pages/LoginPage";
 import ForgotPasswordPage from "./features/auth/pages/ForgotPasswordPage";
 import VerifyResetCodePage from "./features/auth/pages/VerifyResetCodePage";
 import NewPasswordPage from "./features/auth/pages/NewPasswordPage";
+
+// ✅ قائمة المسارات الصحيحة داخل main-page
+const VALID_MAIN_PATHS = [
+  "",
+  "dashboard",
+  "schedule",
+  "specialties",
+  "doctors",
+  "clinics",
+  "map",
+  "secretary",
+  "patients-records",
+  "profile",
+  "conversations",
+  "notifications",
+];
+
+const MainPageRouter = () => {
+  const location = useLocation();
+  
+  const subPath = location.pathname.replace("/main-page", "").replace(/^\//, "");
+  
+  const isValidPath = 
+    VALID_MAIN_PATHS.includes(subPath) ||
+    VALID_MAIN_PATHS.some(path => subPath.startsWith(path + "/"));
+
+  if (!isValidPath) {
+    return <NotFoundPage />;
+  }
+
+  return (
+    <Layout>
+      <Routes>
+        <Route index element={<DashboardPage />} />
+        <Route path="dashboard" element={<DashboardPage />} />
+        <Route path="schedule" element={<SchedulePage />} />
+        <Route path="specialties" element={<SpecialtiesPage />} />
+        <Route path="doctors" element={<DoctorsPage />} />
+        <Route path="doctors/:doctorId" element={<DoctorDetailPage />} />
+        <Route path="clinics" element={<ClinicsPage />} />
+        <Route path="map" element={<MapPage />} />
+        <Route path="secretary" element={<SecretariesPage />} />
+        <Route path="patients-records" element={<PatientsRecordsPage />} />
+        <Route path="profile" element={<ProfilePage />} />
+        <Route path="conversations" element={<ChatList />} />
+        <Route path="conversations/view/:id" element={<Conversation />} />
+        <Route path="notifications" element={<NotificationPage />} />
+      </Routes>
+    </Layout>
+  );
+};
 
 function App() {
   const darkMode = useSelector((state) => state.ui.darkMode);
@@ -63,7 +112,6 @@ function App() {
   return (
     <div className="App">
       <Routes>
-        {/* المسارات العامة (غير محمية) */}
         <Route
           path="/"
           element={
@@ -71,56 +119,19 @@ function App() {
           }
         />
         <Route path="/reset-password" element={<ForgotPasswordPage />} />
-        <Route
-          path="/reset-password/verify"
-          element={<VerifyResetCodePage />}
-        />
-        <Route
-          path="/reset-password/new-password"
-          element={<NewPasswordPage />}
-        />
-        <Route path="*" element={<NotFoundPage />} />
+        <Route path="/reset-password/verify" element={<VerifyResetCodePage />} />
+        <Route path="/reset-password/new-password" element={<NewPasswordPage />} />
 
-        {/* المسارات المحمية داخل لوحة التحكم */}
         <Route
-          path="/main-page/"
+          path="/main-page/*"
           element={
-            isAuthed ? (
-              <Layout>
-                <Routes>
-                  <Route index element={<DashboardPage />} />
-                  <Route path="dashboard" element={<DashboardPage />} />
-                  <Route path="schedule" element={<SchedulePage />} />
-                  <Route path="specialties" element={<SpecialtiesPage />} />
-                  <Route path="doctors" element={<DoctorsPage />} />
-                  <Route
-                    path="doctors/:doctorId"
-                    element={<DoctorDetailPage />}
-                  />
-                  <Route path="clinics" element={<ClinicsPage />} />
-                  <Route path="map" element={<MapPage />} />
-                  <Route path="secretary" element={<SecretariesPage />} />
-                  <Route
-                    path="patients-records"
-                    element={<PatientsRecordsPage />}
-                  />
-                  <Route path="profile" element={<ProfilePage />} />
-                  <Route path="conversations" element={<ChatList />} />
-                  <Route
-                    path="conversations/view/:id"
-                    element={<Conversation />}
-                  />
-                  <Route path="notifications" element={<NotificationPage />} />
-                </Routes>
-              </Layout>
-            ) : (
-              <Navigate to="/" replace />
-            )
+            isAuthed ? <MainPageRouter /> : <Navigate to="/" replace />
           }
         />
+
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
 
-      {/* Snackbar العام */}
       <AppSnackbar
         open={snackbar.open}
         message={snackbar.message}
