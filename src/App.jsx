@@ -1,4 +1,4 @@
-import { useEffect,useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Navigate, Route, Routes } from "react-router-dom";
 import "./App.css";
@@ -22,6 +22,7 @@ import ChatList from "./features/chat/pages/ChatList";
 import Conversation from "./features/chat/pages/Conversation";
 import NotificationPage from "./features/notification/pages/NotificationPage";
 import notificationChatService from "./features/notification/service/notificationChatService";
+import NotFoundPage from "./components/NotFoundPage";
 
 // صفحات المصادقة
 import LoginPage from "./features/auth/pages/LoginPage";
@@ -78,10 +79,11 @@ function App() {
           path="/reset-password/new-password"
           element={<NewPasswordPage />}
         />
+        <Route path="*" element={<NotFoundPage />} />
 
         {/* المسارات المحمية داخل لوحة التحكم */}
         <Route
-          path="/main-page/*"
+          path="/main-page/"
           element={
             isAuthed ? (
               <Layout>
@@ -91,14 +93,23 @@ function App() {
                   <Route path="schedule" element={<SchedulePage />} />
                   <Route path="specialties" element={<SpecialtiesPage />} />
                   <Route path="doctors" element={<DoctorsPage />} />
-                  <Route path="doctors/:doctorId" element={<DoctorDetailPage />} />
+                  <Route
+                    path="doctors/:doctorId"
+                    element={<DoctorDetailPage />}
+                  />
                   <Route path="clinics" element={<ClinicsPage />} />
                   <Route path="map" element={<MapPage />} />
                   <Route path="secretary" element={<SecretariesPage />} />
-                  <Route path="patients-records" element={<PatientsRecordsPage />} />
+                  <Route
+                    path="patients-records"
+                    element={<PatientsRecordsPage />}
+                  />
                   <Route path="profile" element={<ProfilePage />} />
                   <Route path="conversations" element={<ChatList />} />
-                  <Route path="conversations/view/:id" element={<Conversation />} />
+                  <Route
+                    path="conversations/view/:id"
+                    element={<Conversation />}
+                  />
                   <Route path="notifications" element={<NotificationPage />} />
                 </Routes>
               </Layout>
