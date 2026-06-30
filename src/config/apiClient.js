@@ -42,4 +42,41 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
+apiClient.interceptors.request.use(
+  (config) => {
+    const storedToken = readStoredToken();
+
+    if (storedToken) {
+      config.headers = config.headers || {};
+      config.headers.Authorization = `Bearer ${storedToken}`;
+    }
+    
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
+
+// 2️⃣ 👇 تم إضافة مُعترض الاستجابات (Response Interceptor) للتعامل مع الـ 401 فوراً
+apiClient.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.response.status === 401) {
+      if (window.location.pathname === '/') {
+        return Promise.reject(error);
+      }
+      try {
+        localStorage.removeItem(AUTH_STORAGE_KEY);
+        sessionStorage.removeItem(AUTH_STORAGE_KEY);
+      } catch (e) {
+        console.error("Failed to clear auth storage:", e);
+      }
+      window.location.href = '/';
+    }
+    
+    return Promise.reject(error);
+  }
+);
+
 export default apiClient;

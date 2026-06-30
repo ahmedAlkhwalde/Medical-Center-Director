@@ -167,7 +167,7 @@ export const useCreateSpecialtyMutation = (options = {}) => {
     onError: (error, variables, context) => {
       // عرض رسالة السيرفر للخطأ
       const serverMessage = error?.response?.data?.message;
-      const errorMessage = "تعذر إضافة الاختصاص حالياً، تحقق من الحقول";
+      const errorMessage = serverMessage || "تعذر إضافة الاختصاص حالياً، تحقق من الحقول";
       dispatch(showSnackbar({ message: errorMessage, variant: "error" }));
 
       options.onError?.(error, variables, context);
@@ -201,7 +201,7 @@ export const useUpdateSpecialtyMutation = (options = {}) => {
     onError: (error, variables, context) => {
       // عرض رسالة السيرفر للخطأ
       const serverMessage = error?.response?.data?.message;
-      const errorMessage = "تعذر تحديث الاختصاص حالياً";
+      const errorMessage = serverMessage || "تعذر تحديث الاختصاص حالياً";
       dispatch(showSnackbar({ message: errorMessage, variant: "error" }));
 
       options.onError?.(error, variables, context);
@@ -239,9 +239,8 @@ export const useDeleteSpecialtyMutation = (options = {}) => {
       if (context?.previous) {
         queryClient.setQueryData(SPECIALTIES_QUERY_KEY, context.previous);
       }
-      // عرض رسالة السيرفر للخطأ عند الحذف
       const serverMessage = error?.response?.data?.message;
-      const errorMessage = "تعذر حذف الاختصاص حالياً";
+      const errorMessage = serverMessage || "تعذر حذف الاختصاص حالياً";
       dispatch(showSnackbar({ message: errorMessage, variant: "error" }));
 
       options.onError?.(error, variables, context);
